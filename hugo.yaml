@@ -163,7 +163,7 @@ params:
   algoliaSearch:
     enable: false
   localSearch:
-    enable: true
+    enable: false
     path: /searchindexes.xml
     preload: false
     topnperarticle: 1
