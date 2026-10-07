@@ -30,6 +30,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Hugo NexT theme
+        run: |
+          mkdir -p themes
+          git clone --depth 1 --branch v4.8.3 https://github.com/hugo-next/hugo-theme-next.git themes/hugo-theme-next
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6
