@@ -49,7 +49,7 @@ menus:
       pageRef: /about
       pre: user
       weight: 4
-    - identifier: search
+    - identifier: search-page
       name: 搜索
       pageRef: /search
       pre: search
