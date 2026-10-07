@@ -43,6 +43,10 @@ params:
   subtitle: 记录、整理与展示
   mainSections:
     - posts
+  yearFormat: "2006"
+  monthFormat: "2006-01"
+  dateFormat: "2006-01-02"
+  timeFormat: "2006-01-02 15:04:05 -07:00"
   scheme: Gemini
   darkmode: true
   bodyScrollbar:
