@@ -83,13 +83,13 @@ params:
     position: left
     width: 256
   motion:
-    enable: true
+    enable: false
     transition:
-      sidebar: fadeInUp
-      collHeader: slideInRight
-      postBlock: fadeIn
-      postBody: fadeInDown
-      postHeader: fadeInDown
+      sidebar: false
+      collHeader: false
+      postBlock: false
+      postBody: false
+      postHeader: false
   backTop:
     enable: true
     scrollpercent: true
