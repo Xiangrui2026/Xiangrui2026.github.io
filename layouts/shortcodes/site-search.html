@@ -1,0 +1,14 @@
+<div class="site-search-page" data-index-url="{{ "searchindexes.xml" | relURL }}">
+  <form class="site-search-form" role="search">
+    <label class="site-search-label" for="site-search-query">站内搜索</label>
+    <div class="site-search-controls">
+      <input id="site-search-query" class="site-search-input" name="q" type="search"
+             placeholder="输入文章标题或关键词" autocomplete="off" spellcheck="false">
+      <button class="site-search-submit" type="submit">搜索</button>
+    </div>
+    <p class="site-search-status" aria-live="polite">正在加载搜索索引…</p>
+    <ol class="site-search-results"></ol>
+  </form>
+</div>
+<link rel="stylesheet" href="{{ "css/site-search.css" | relURL }}">
+<script src="{{ "js/site-search.js" | relURL }}" defer></script>

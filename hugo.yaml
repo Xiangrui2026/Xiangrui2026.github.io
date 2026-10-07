@@ -10,6 +10,19 @@ summaryLength: 80
 mainSections:
   - posts
 
+outputFormats:
+  LocalIndexes:
+    mediaType: application/xml
+    baseName: searchindexes
+    isPlainText: true
+    notAlternative: true
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - LocalIndexes
+
 caches:
   images:
     dir: :cacheDir/images
@@ -36,6 +49,11 @@ menus:
       pageRef: /about
       pre: user
       weight: 4
+    - identifier: search
+      name: 搜索
+      pageRef: /search
+      pre: search
+      weight: 5
 
 params:
   author: Joesph
@@ -146,6 +164,9 @@ params:
     enable: false
   localSearch:
     enable: true
+    path: /searchindexes.xml
+    preload: false
+    topnperarticle: 1
   gitter:
     enable: false
   comments:
