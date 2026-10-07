@@ -1,0 +1,55 @@
+baseURL: "https://xiangrui2026.github.io/"
+languageCode: zh-cn
+defaultContentLanguage: zh-cn
+title: Joesph
+theme: github.com/hugo-next/hugo-theme-next/v4
+hasCJKLanguage: true
+timeZone: Asia/Shanghai
+enableRobotsTXT: true
+summaryLength: 80
+mainSections:
+  - posts
+
+caches:
+  images:
+    dir: :cacheDir/images
+
+menus:
+  main:
+    - identifier: posts
+      name: 文章
+      pageRef: /posts
+      pre: file-text
+      weight: 1
+    - identifier: archives
+      name: 归档
+      pageRef: /archives
+      pre: archive
+      weight: 2
+    - identifier: showcase
+      name: 展示
+      pageRef: /showcase
+      pre: picture-o
+      weight: 3
+    - identifier: about
+      name: 关于我
+      pageRef: /about
+      pre: user
+      weight: 4
+
+params:
+  author: Joesph
+  description: Joesph 的个人网站
+  subtitle: 记录、整理与展示
+  mainSections:
+    - posts
+  scheme: Gemini
+  show_menu: true
+  menu_settings:
+    icons: true
+    badges: false
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: false
