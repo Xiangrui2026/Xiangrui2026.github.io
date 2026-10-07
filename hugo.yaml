@@ -44,10 +44,106 @@ params:
   mainSections:
     - posts
   scheme: Gemini
-  show_menu: true
-  menu_settings:
+  darkmode: true
+  bodyScrollbar:
+    overlay: false
+    stable: true
+  mobileLayoutEconomy: true
+  themeColor:
+    dark: "#222"
+    light: "#222"
+  bookmark:
+    color: "#222"
+    enable: true
+  githubBanner:
+    enable: true
+  menuSets:
     icons: true
+    transition: true
     badges: false
+  footer:
+    icon:
+      color: "#ff0000"
+      animated: true
+    beian:
+      enable: false
+  font:
+    enable: true
+  codeblock:
+    copyBtn: true
+    style: mac
+    maxHeight: 200
+  sidebar:
+    offset: 12
+    padding: 18
+    position: left
+    width: 256
+  motion:
+    enable: true
+    transition:
+      sidebar: fadeInUp
+      collHeader: slideInRight
+      postBlock: fadeIn
+      postBody: fadeInDown
+      postHeader: fadeInDown
+  backTop:
+    enable: true
+    scrollpercent: true
+    sidebar: false
+  avatar:
+    rotated: true
+    rounded: true
+  siteState:
+    basic: true
+  socialIcons:
+    iconsOnly: false
+    transition: true
+  linksSets:
+    layout: inline
+  toc:
+    enable: true
+    number: true
+    expandAll: false
+    wrap: false
+  creativeCommons:
+    post: false
+  postEdit:
+    enable: false
+  postMeta:
+    itemText: false
+  rewardSets:
+    animation: false
+  postFooter:
+    tagIcon: false
+  share:
+    enable: false
+  textAlign:
+    desktop: left
+    mobile: left
+  note:
+    icons: true
+    lightBgOffset: 0
+    style: simple
+  tabs:
+    transition:
+      labels: true
+      tabs: false
+  readingProgress:
+    start: left
+    color: "#37c6c0"
+    enable: true
+    height: 3px
+    position: top
+    reversed: false
+  pdf:
+    enable: false
+    height: 500px
+  algoliaSearch:
+    enable: false
+  localSearch:
+    enable: true
+  gitter:
+    enable: false
 
 markup:
   goldmark:
