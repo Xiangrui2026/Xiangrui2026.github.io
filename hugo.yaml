@@ -144,6 +144,9 @@ params:
     enable: true
   gitter:
     enable: false
+  comments:
+    storage: false
+    nav: []
 
 markup:
   goldmark:
