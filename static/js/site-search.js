@@ -71,17 +71,16 @@
     status.textContent = `找到 ${matches.length} 条结果。`;
     for (const { entry } of matches) {
       const item = document.createElement('li');
-      const heading = document.createElement('h2');
       const link = document.createElement('a');
       const target = new URL(entry.url, window.location.origin);
       if (target.origin !== window.location.origin) continue;
       link.href = target.href;
+      link.className = 'site-search-result-title';
       addHighlightedText(link, entry.title, terms);
-      heading.append(link);
 
       const excerpt = document.createElement('p');
       addHighlightedText(excerpt, makeExcerpt(entry, terms), terms);
-      item.append(heading, excerpt);
+      item.append(link, excerpt);
       results.append(item);
     }
   }
