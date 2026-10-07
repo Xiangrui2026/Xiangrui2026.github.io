@@ -2,7 +2,7 @@ baseURL: "https://xiangrui2026.github.io/"
 languageCode: zh-cn
 defaultContentLanguage: zh-cn
 title: Joesph
-theme: github.com/hugo-next/hugo-theme-next/v4
+theme: hugo-theme-next
 hasCJKLanguage: true
 timeZone: Asia/Shanghai
 enableRobotsTXT: true
