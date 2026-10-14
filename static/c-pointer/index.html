@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="逐行探索 C 指针：查看地址、指向关系与每一个字节的变化。离线可用的交互式教学实验室。">
+  <title>Memory Lens · C 指针实验室</title>
+  <style>
+:root{color-scheme:dark;--bg:#0b101a;--surface:#121a28;--surface2:#172131;--border:#273244;--text:#e8edf6;--muted:#9baac0;--dim:#65768f;--mint:#87edcd;--purple:#b9a2f6;--blue:#7abefa;--red:#ff9b9f;--mono:"Cascadia Code","SFMono-Regular",Consolas,"Liberation Mono",monospace;--sans:Inter,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 var(--sans)}button,input,select{font:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer;color:inherit}button:disabled{opacity:.35;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--mint);outline-offset:4px}a{color:var(--mint);text-decoration:none}button{border:0}code,.mono{font-family:var(--mono)}.topbar{height:85px;padding:0 32px;display:flex;align-items:center;border-bottom:1px solid var(--border);gap:24px;background:#0e1520;position:relative;z-index:2}.brand{display:flex;align-items:center;gap:12px;color:var(--text);font-size:19px;font-weight:650;letter-spacing:-.4px}.brandmark{font:28px var(--mono);letter-spacing:-4px;border:1px solid var(--border);border-radius:12px;width:45px;height:45px;display:grid;place-items:center;color:var(--muted)}.brandmark b{color:var(--mint)}.brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:2px;font-weight:400}.topnav{display:flex;gap:6px;margin-left:60px}.topnav button{background:transparent;color:var(--muted);padding:12px 18px;border-radius:8px}.topnav button.active{background:#1b2938;color:var(--mint)}.offline{margin-left:auto;color:var(--muted);font:10px var(--mono);letter-spacing:1px;white-space:nowrap}.offline i{display:inline-block;width:6px;height:6px;background:var(--mint);border-radius:50%;margin-right:8px}.app-shell{display:grid;grid-template-columns:234px minmax(0,1fr);min-height:calc(100vh - 85px)}.sidebar{border-right:1px solid var(--border);padding:28px 16px;display:flex;flex-direction:column;background:#0e1520}.sidebar-top{display:flex;justify-content:space-between;align-items:center;padding:0 8px}.eyebrow{font-size:10px;letter-spacing:1.8px;font-weight:650;color:var(--muted)}.mint{color:var(--mint)}.count{font:10px var(--mono);border:1px solid var(--border);border-radius:5px;padding:0 6px;color:var(--muted)}.search{margin:19px 0 22px;display:flex;gap:7px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--muted)}.search>span{font-size:21px;line-height:1}.search input{min-width:0;width:100%;font-size:12px;color:var(--text);background:transparent;border:0;outline:none}.search input::placeholder{color:var(--dim)}.nav-group{margin-bottom:21px}.nav-group h3{font-size:10px;color:var(--dim);letter-spacing:1.5px;padding:0 8px;margin:0 0 8px}.lesson-link{display:flex;align-items:center;width:100%;padding:9px 8px;background:transparent;border-radius:7px;color:var(--muted);font-size:12px;text-align:left;gap:9px;line-height:1.4;margin:2px 0}.lesson-link .nav-no{font:10px var(--mono);color:var(--dim);min-width:18px}.lesson-link:hover{background:var(--surface2);color:var(--text)}.lesson-link.active{color:var(--mint);background:#1b2f31}.lesson-link.active .nav-no{color:var(--mint)}.lesson-link .nav-status{margin-left:auto;font-size:9px;color:var(--dim)}.lesson-link.active .nav-status{color:var(--mint)}.sidebar-bottom{display:flex;gap:10px;margin-top:auto;padding:18px 8px 0;border-top:1px solid var(--border);color:var(--dim);font-size:10px;align-items:flex-start}.tiny-chip{border:1px solid var(--border);border-radius:4px;padding:1px 5px;font:10px var(--mono);color:var(--muted)}main{min-width:0;padding:32px 32px 0;max-width:1900px}.page{display:none}.page.active{display:block}.hero{display:flex;align-items:center;justify-content:space-between;gap:25px;margin:4px 0 34px}.hero h1,h1{font-size:36px;letter-spacing:-1.3px;font-weight:620;line-height:1.3;margin:11px 0 12px}h1 span{color:var(--mint)}.hero p,.page-intro{margin:0;color:var(--muted);font-size:13px}.hero-stats{display:flex;gap:28px;flex-shrink:0;text-align:center}.hero-stats strong{font:30px/1 var(--mono);color:var(--text);font-weight:400}.hero-stats small{display:block;font-size:10px;letter-spacing:.8px;color:var(--dim);margin-top:8px}.lesson-heading{display:flex;gap:17px;align-items:center;margin-bottom:22px}.lesson-number{width:49px;height:55px;background:var(--surface);border:1px solid var(--border);border-radius:9px;font:24px var(--mono);color:var(--purple);display:grid;place-items:center;flex-shrink:0}.lesson-heading h2{font-size:22px;line-height:1.5;letter-spacing:-.5px;font-weight:600;margin:1px 0}.lesson-heading p{margin:0;font-size:12px;color:var(--muted);max-width:760px}.quiet-btn{background:transparent;color:var(--muted);margin-left:auto;white-space:nowrap;font-size:12px;padding:10px}.quiet-btn span{margin-left:15px;color:var(--mint)}.controlbar{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);padding:10px 13px;border-radius:10px 10px 0 0;gap:12px}.transport{display:flex;gap:7px;align-items:center}.icon-btn{width:33px;height:33px;border-radius:6px;background:var(--surface2);color:var(--muted);font-size:17px;line-height:1}.icon-btn:hover,.step-btn:hover{background:#2b3a4c}.play-btn{background:var(--mint);color:#10271f;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:650;min-width:115px;line-height:19px}.play-btn>span:first-child{margin-right:4px;font-size:11px}.step-btn{background:#233244;border:1px solid #35465c;border-radius:6px;padding:6px 12px;font-size:12px;white-space:nowrap}.step-btn span{margin-left:13px;color:var(--mint)}.play-config{display:flex;align-items:center;gap:22px;color:var(--muted);font-size:11px}.play-config select{margin-left:4px;color:var(--text);background:transparent;border:0;font-size:11px}.play-config select option{background:var(--surface)}.timeline-wrap{padding:11px 15px 9px;background:#111926;border:1px solid var(--border);border-top:0;border-radius:0 0 10px 10px;margin-bottom:20px}.timeline-wrap input{width:100%;height:3px;margin:5px 0;display:block;accent-color:var(--mint);cursor:pointer}.timeline-label{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:6px}.timeline-label span:nth-child(2){color:var(--muted)}.workspace{display:grid;grid-template-columns:minmax(340px,.87fr) minmax(420px,1.13fr);gap:18px;align-items:start}.panel{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;min-width:0}.panel-top{height:47px;padding:0 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-size:12px;font-weight:600}.panel-top>span{display:flex;align-items:center;gap:8px}.panel-dot{width:6px;height:6px;border-radius:50%}.purple{background:var(--purple)}.mint-dot{background:var(--mint)}.panel-top small{font:10px var(--mono);border:1px solid var(--border);border-radius:4px;padding:0 5px;color:var(--dim);margin-left:4px}.panel-top .subtle{font-size:10px;color:var(--dim);font-weight:400}.code-note{font-size:10px;color:var(--dim);padding:9px 16px;border-bottom:1px solid #202b3c}.code-lines{padding:12px 0;max-height:535px;min-height:288px;overflow:auto;scrollbar-color:#34445a transparent;scrollbar-width:thin}.code-line{display:grid;grid-template-columns:22px 28px minmax(0,1fr);width:100%;background:transparent;text-align:left;gap:1px;padding:9px 12px;font:12px/1.6 var(--mono);color:#b9c5d8;position:relative;border-left:3px solid transparent}.line-number{color:var(--dim);font-size:10px;text-align:right;padding-right:9px}.line-marker{color:var(--dim);text-align:center;font-size:10px;align-self:center}.line-code{white-space:pre-wrap;word-break:break-word}.code-line:hover{background:#1b273a}.code-line.completed .line-marker{color:#55667e}.code-line.current{background:#203137;border-left-color:var(--mint);color:var(--text)}.code-line.current .line-marker,.code-line.current .line-number{color:var(--mint)}.code-line.future{opacity:.7}.code-line.failed{border-left-color:var(--red);background:#392730}.tok-keyword{color:var(--purple)}.tok-number{color:#e5be8a}.tok-string{color:var(--mint)}.tok-op{color:var(--blue)}.tok-comment{color:var(--dim)}.code-footer{display:flex;justify-content:space-between;gap:8px;color:var(--dim);font-size:9px;padding:10px 14px;border-top:1px solid var(--border);min-height:36px}.code-footer>span:first-child{color:var(--muted)}.chip-btn{background:var(--surface2);border:1px solid var(--border);font-size:9px;border-radius:5px;padding:3px 7px;color:var(--muted);font-weight:400}.memory-legend{padding:11px 15px 4px;display:flex;align-items:center;gap:12px;font-size:9px;color:var(--muted)}.memory-legend>span{display:flex;align-items:center;gap:5px}.memory-legend i{width:5px;height:5px;border-radius:2px}.legend-new{background:var(--purple)}.legend-read{background:var(--blue)}.legend-write{background:var(--mint)}.legend-dead{background:var(--red)}.legend-hint{margin-left:auto;color:var(--dim)}.memory-stage{position:relative;padding:12px 15px 12px;min-height:241px}.memory-list{padding-right:46px;position:relative;z-index:1}.memory-stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}.mem-block{background:#0e1622;border:1px solid var(--border);border-radius:7px;margin-bottom:11px;position:relative;transition:background .18s}.mem-block:last-child{margin-bottom:0}.mem-block.new{border-color:#625285;background:#1d2030}.mem-block.write{border-color:#397d6b;background:#142725}.mem-block.read{border-color:#416b8f}.mem-block.dead{border:1px dashed #694350;opacity:.65}.mem-block.dead .byte{color:var(--dim);text-decoration:line-through}.mem-header{padding:8px 10px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap;line-height:1.4}.mem-name{font:12px var(--mono);font-weight:600}.mem-type{font:9px var(--mono);color:var(--dim);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.region-tag{font-size:8px;letter-spacing:.8px;color:var(--dim);margin-left:auto;text-transform:uppercase}.region-tag.heap{color:#edbc86}.region-tag.static{color:var(--purple)}.region-tag.code{color:var(--blue)}.mem-address{font:9px var(--mono);color:var(--muted)}.mem-value-row{display:flex;justify-content:space-between;gap:7px;align-items:center;padding:5px 10px;font:11px var(--mono);position:relative;min-height:26px}.mem-value{color:var(--text);overflow-wrap:anywhere;white-space:normal}.ptr-chip{color:var(--mint);display:inline-block}.ptr-source{width:5px;height:5px;position:absolute;right:0;top:12px;border-radius:50%;background:var(--mint)}.target-anchor{position:absolute;right:0;top:19px;width:1px;height:1px}.mem-size{font:9px var(--mono);color:var(--dim);flex-shrink:0}.bytes{padding:2px 10px 9px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;max-width:340px}.byte{border:1px solid #253245;border-radius:3px;background:#121e2c;color:#9db0ca;min-height:30px;padding:4px 0 2px;text-align:center;font:10px/1.2 var(--mono);position:relative}.byte small{display:block;color:#5f7693;font-size:7px;margin-bottom:3px}.byte.was-read{background:#1c344a;border-color:#406588;color:#a2d4fc}.byte.was-written{background:#20483b;border-color:#46826d;color:var(--mint)}.byte.was-new{background:#292739;border-color:#554c74;color:#c4b5eb}.byte.selected{outline:1px solid var(--mint);outline-offset:1px}.byte:hover{background:#2b3a4e;color:var(--text)}.mem-label{font-size:9px;color:var(--muted);padding:0 10px 8px;line-height:1.5}.mem-invalid{font-size:9px;color:var(--red);padding:0 10px 9px}.pointer-detail{font:9px var(--mono);padding:0 10px 6px;color:var(--mint);overflow-wrap:anywhere}.memory-empty{display:flex;align-items:center;justify-content:center;min-height:210px;flex-direction:column;gap:8px;color:var(--muted);font-size:12px}.memory-empty .empty-symbol{font:36px var(--mono);color:#354b65}.memory-empty p{font-size:10px;color:var(--dim);margin:0}.byte-inspector{padding:11px 15px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);min-height:49px;background:#111b28;display:flex;align-items:center;gap:11px;flex-wrap:wrap}.inspect-value{font:18px var(--mono);color:var(--mint)}.inspect-label{font-size:8px;color:var(--dim);display:block;line-height:1.3}.inspect-part{font:10px var(--mono);border-left:1px solid var(--border);padding-left:10px;min-width:58px}.memory-model{display:flex;justify-content:space-between;font-size:8px;color:var(--dim);border-top:1px solid var(--border);padding:8px 15px;gap:8px}.hide-addresses .mem-address{display:none}.step-detail{display:flex;gap:15px;margin-top:19px;padding:18px 20px;border:1px solid var(--border);border-radius:9px;background:#121c2a;align-items:flex-start}.detail-icon{font:22px var(--mono);color:var(--mint);background:#203432;width:35px;height:35px;display:grid;place-items:center;border-radius:8px;flex-shrink:0}.detail-body{flex:1;min-width:0}.step-detail h3{font-size:13px;margin:3px 0 7px;font-weight:500;line-height:1.8}.changes{display:flex;gap:6px;flex-wrap:wrap}.change{font:10px/1.5 var(--mono);color:var(--muted);background:#1b2a39;padding:4px 7px;border-radius:4px}.change.write{color:var(--mint);background:#1d342e}.change.read{color:var(--blue)}.change.danger{color:var(--red);background:#39242e}.step-detail.danger{background:#241923;border-color:#684251}.step-detail.danger .detail-icon{color:var(--red);background:#432831}.console{font:10px/1.7 var(--mono);color:var(--muted);width:27%;border-left:1px solid var(--border);padding-left:15px;word-break:break-word}.console:empty{display:none}.console-title{color:var(--dim);font:9px var(--sans);letter-spacing:1px;margin-bottom:5px}.takeaway{display:flex;gap:17px;align-items:center;padding:20px 4px;border-bottom:1px solid var(--border)}.takeaway-mark{color:var(--purple);font:40px var(--mono);line-height:1;width:30px;text-align:center}.takeaway p{font-size:12px;color:var(--muted);margin:4px 0;max-width:950px}.takeaway a{margin-left:auto;flex-shrink:0;font-size:10px}.lab-bottom{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);padding:16px 0;gap:14px}.lab-bottom button{background:transparent;color:var(--mint);font-size:10px;white-space:nowrap}footer{display:flex;justify-content:space-between;gap:20px;font-size:9px;color:var(--dim);padding:18px 0;border-top:1px solid var(--border);margin-top:18px}footer b{color:var(--mint);padding:0 6px}.page-intro{max-width:950px;line-height:1.9;margin:0 0 25px}.syntax-explainer{display:flex;gap:35px;align-items:center;padding:24px;background:#182330;border:1px solid var(--border);border-radius:10px;margin:24px 0}.syntax-explainer>div{flex:1}.syntax-explainer code{color:var(--mint);font-size:23px}.syntax-explainer p{font-size:12px;color:var(--muted);margin:6px 0 0}.syntax-explainer>span{font:28px var(--mono);color:var(--purple)}.syntax-group{margin:30px 0 15px;font-size:14px;color:var(--purple);font-weight:500}.syntax-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.syntax-card{padding:19px;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:0}.syntax-card-top{display:flex;gap:10px;justify-content:space-between;margin-bottom:12px;align-items:center}.syntax-card h3{font-size:14px;font-weight:550;margin:0}.syntax-card-no{font:10px var(--mono);color:var(--dim)}.syntax-card code{display:block;white-space:pre-wrap;word-break:break-word;color:var(--mint);font-size:12px;background:#0d1621;padding:9px 11px;border-radius:5px;margin-top:5px}.syntax-card p{font-size:11px;line-height:1.9;color:var(--muted)}.syntax-card button{background:transparent;color:var(--purple);font-size:10px;padding:0}.atlas-note{color:var(--muted);font-size:12px;line-height:2.2;border:1px solid var(--border);border-radius:10px;padding:20px;margin:23px 0}.atlas-note code{color:var(--mint);font-size:11px}.model-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.model-card{padding:25px;background:var(--surface);border:1px solid var(--border);border-radius:10px}.model-index{font:10px var(--mono);color:var(--purple)}.model-card h2{font-size:18px;font-weight:500;margin:12px 0}.model-card p,.source-box p{font-size:12px;color:var(--muted);line-height:1.9}.source-box{padding:25px;background:#14202c;border:1px solid var(--border);border-radius:10px;margin:20px 0}.source-box h2{font-size:18px;font-weight:500;margin:10px 0}.source-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.source-links a{font-size:12px;padding:10px;background:#1b2b39;border-radius:6px}.no-results{color:var(--dim);font-size:12px;padding:20px 8px}
+.brandmark{display:inline-flex;align-items:center;justify-content:center;letter-spacing:-3px;white-space:nowrap}.brandmark b{font-weight:500;line-height:1}.pointer-detail{position:relative}.pointer-detail .ptr-source{top:5px}.mem-block.dead .pointer-detail .ptr-source{display:none}.byte.is-target{border-bottom:2px solid var(--mint)}.byte:nth-child(4n){margin-right:3px}
+.topbar{position:sticky;top:0;z-index:20}.sidebar{position:sticky;top:85px;height:calc(100vh - 85px);align-self:start;overflow:hidden}#scenario-nav{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#314259 transparent;min-height:0;flex:1;overscroll-behavior:contain}.sidebar-top,.search,.sidebar-bottom{flex-shrink:0}.controlbar{position:sticky;top:85px;z-index:10}.timeline-wrap{position:sticky;top:140px;z-index:9}.code-panel{position:sticky;top:206px}.code-lines{max-height:calc(100vh - 335px)}
+@media(min-width:1600px){main{padding:38px 44px 0}.workspace{grid-template-columns:minmax(420px,.9fr) minmax(500px,1.1fr)}.bytes{max-width:380px}.byte{min-height:34px;font-size:11px}.code-line{font-size:13px;padding:11px 16px}.hero h1{font-size:42px}}
+@media(max-width:1250px){.app-shell{grid-template-columns:205px minmax(0,1fr)}main{padding:25px 22px 0}.hero-stats{gap:15px}.hero h1{font-size:30px}.workspace{grid-template-columns:minmax(280px,.85fr) minmax(335px,1.15fr);gap:12px}.topnav{margin-left:20px}.memory-list{padding-right:30px}.memory-stage{padding:10px}.bytes{padding-left:7px;padding-right:7px}.byte{font-size:9px}.memory-legend{gap:8px}.legend-hint{display:none}.play-config{gap:10px}.code-line{font-size:11px;padding-left:4px;padding-right:8px;grid-template-columns:18px 24px 1fr}.console{width:24%}.takeaway a{display:none}}
+@media(max-width:1040px){.hero-stats{display:none}.workspace{grid-template-columns:1fr}.code-lines{max-height:310px;min-height:160px}.memory-stage{min-height:220px}.memory-list{padding-right:50px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}.mem-block{margin:0}.bytes{max-width:100%}.topbar{padding:0 20px}.topnav button{padding:10px 12px;font-size:12px}.offline{display:none}.console{width:30%}.step-detail{padding:16px}.syntax-grid{grid-template-columns:1fr}.model-grid{grid-template-columns:1fr}.hero{margin-bottom:24px}.memory-model{font-size:9px}}
+@media(max-width:740px){.topbar{height:auto;min-height:80px;padding:14px 17px;flex-wrap:wrap;gap:10px}.brand{font-size:17px}.brand small{font-size:8px}.brandmark{width:37px;height:37px;font-size:24px}.topnav{margin-left:auto;gap:0}.topnav button{padding:8px;font-size:10px}.app-shell{display:block}.sidebar{padding:14px 16px;border-right:0;border-bottom:1px solid var(--border)}.sidebar-top,.sidebar-bottom{display:none}.search{margin:0 0 8px;padding:6px 10px}#scenario-nav{display:flex;gap:6px;overflow-x:auto;max-height:88px;padding-bottom:4px}.nav-group{display:contents}.nav-group h3{display:none}.lesson-link{flex-shrink:0;width:auto;max-width:230px;white-space:nowrap;padding:8px}.lesson-link .nav-status{display:none}main{padding:23px 16px 0}.hero h1,h1{font-size:28px;letter-spacing:-1px}.hero p{font-size:11px}.hero{margin-bottom:26px}.eyebrow{font-size:9px}.lesson-heading h2{font-size:18px}.lesson-heading p{font-size:11px}.lesson-number{width:39px;height:45px;font-size:20px}.lesson-heading{gap:11px}.quiet-btn{display:none}.controlbar{flex-wrap:wrap;padding:9px}.transport{flex:1;justify-content:space-between;gap:5px}.play-config{width:100%;justify-content:space-between;padding:0 3px}.play-btn{padding:6px 10px;min-width:104px}.step-btn{padding:6px 9px}.timeline-label{font-size:8px}.workspace{gap:13px}.code-line{font-size:11px;padding:8px;grid-template-columns:20px 26px 1fr}.code-note{font-size:9px}.memory-list{grid-template-columns:1fr;padding-right:41px}.memory-stage{padding:12px}.byte{font-size:11px;min-height:34px}.bytes{max-width:350px}.memory-legend{gap:12px;padding:11px 14px 4px}.step-detail{gap:10px;flex-wrap:wrap;padding:14px}.detail-icon{width:29px;height:29px;font-size:19px}.step-detail h3{font-size:12px}.console{width:100%;border:0;border-top:1px solid var(--border);margin-top:6px;padding:10px 0 0}.takeaway{gap:10px}.takeaway p{font-size:11px}.lab-bottom{font-size:9px;align-items:start}footer{font-size:8px}footer>span:last-child{display:none}.syntax-explainer{gap:14px;padding:17px}.syntax-explainer code{font-size:16px}.syntax-explainer p{font-size:10px}.syntax-explainer>span{font-size:21px}.model-card,.source-box{padding:20px}.source-links{grid-template-columns:1fr}.atlas-note{padding:17px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+@media(max-width:1040px){.code-panel{position:static}.code-lines{max-height:310px;min-height:160px}}
+@media(max-width:740px){.topbar{position:static}.sidebar{position:static;height:auto;overflow:hidden}#scenario-nav{overflow-x:auto;overflow-y:hidden;max-height:88px}.controlbar{top:0}.timeline-wrap{top:84px}.code-panel{position:static}}
+
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#lab" data-tab="lab" aria-label="C 指针实验室首页"><span class="brandmark">{<b>*</b>}</span><span>Memory Lens<small>C 指针实验室</small></span></a>
+    <nav class="topnav" aria-label="页面导航"><button class="active" data-tab="lab">交互实验室</button><button data-tab="syntax">语法图谱</button><button data-tab="model">模型与来源</button></nav>
+    <span class="offline"><i></i> OFFLINE READY</span>
+  </header>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-top"><span class="eyebrow">LEARNING PATH</span><span id="scenario-total" class="count"></span></div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索语法或功能…" aria-label="搜索实验"></label>
+      <div id="scenario-nav"></div>
+      <div class="sidebar-bottom"><span class="tiny-chip">C17</span><span>核心语法 · C23 单独标注<br>按顺序学，也可以直接探索。</span></div>
+    </aside>
+    <main>
+      <section id="lab" class="page active">
+        <div class="hero"><div><div class="eyebrow mint">C POINTERS, MADE VISIBLE</div><h1>让指针，变得看得见<span>。</span></h1><p>跟随每一行代码，观察地址如何连接，字节如何改变。</p></div><div class="hero-stats"><div><strong id="stat-scenarios">25</strong><small>交互实验</small></div><div><strong>01</strong><small>字节级观察</small></div><div><strong>∞</strong><small>回退与重放</small></div></div></div>
+        <div class="lesson-heading"><div class="lesson-number" id="lesson-number">01</div><div><div id="lesson-category" class="eyebrow"></div><h2 id="lesson-title"></h2><p id="lesson-description"></p></div><button id="next-lesson" class="quiet-btn">下一课 <span>↗</span></button></div>
+        <div class="controlbar">
+          <div class="transport"><button id="reset" class="icon-btn" title="回到执行前" aria-label="回到执行前">↺</button><button id="back" class="icon-btn" title="上一步（←）" aria-label="上一步">←</button><button id="play" class="play-btn" aria-label="自动播放"><span id="play-icon">▶</span> <span id="play-label">自动播放</span></button><button id="forward" class="step-btn">下一步 <span>→</span></button><button id="end" class="icon-btn" title="执行到结尾" aria-label="执行到结尾">⇥</button></div>
+          <div class="play-config"><label>速度 <select id="speed" aria-label="播放速度"><option value="1800">慢速</option><option value="1000" selected>标准</option><option value="500">快速</option></select></label><span id="step-count" class="mono"></span></div>
+        </div>
+        <div class="timeline-wrap"><input id="timeline" type="range" min="0" value="0" aria-label="执行步骤时间轴"><div class="timeline-label"><span>执行前</span><span id="execution-status">可随时回退，内存同步恢复</span><span>执行结束</span></div></div>
+        <div class="workspace">
+          <section class="panel code-panel"><div class="panel-top"><span><i class="panel-dot purple"></i> 执行轨迹 <small>C</small></span><span class="subtle">点击任意行跳转</span></div><div class="code-note">按执行顺序展开；函数调用会进入其函数体。</div><div id="code-lines" class="code-lines"></div><div class="code-footer"><span id="code-current"></span><span class="mono">← / → 单步 · 空格 播放</span></div></section>
+          <section class="panel memory-panel"><div class="panel-top"><span><i class="panel-dot mint-dot"></i> 内存现场</span><button id="addresses" class="chip-btn" aria-pressed="true">地址可见</button></div><div class="memory-legend"><span><i class="legend-new"></i>分配</span><span><i class="legend-read"></i>读取</span><span><i class="legend-write"></i>写入</span><span><i class="legend-dead"></i>失效</span><span class="legend-hint">点击字节看详情</span></div><div id="memory-stage" class="memory-stage"><svg id="pointer-arrows" aria-hidden="true"></svg><div id="memory-list" class="memory-list"></div></div><div id="byte-inspector" class="byte-inspector"></div><div class="memory-model"><span class="mono">int 4B · pointer 8B · little-endian</span><span>教学模拟地址</span></div></section>
+        </div>
+        <div class="step-detail"><div class="detail-icon" id="detail-icon">↳</div><div class="detail-body"><div class="eyebrow" id="detail-title">THIS STEP</div><h3 id="step-explanation"></h3><div id="changes" class="changes"></div></div><div id="console" class="console"></div></div>
+        <div class="takeaway"><span class="takeaway-mark">*</span><div><span class="eyebrow">记住这一点</span><p id="takeaway"></p></div><a id="lesson-source" target="_blank" rel="noopener">参考语法 ↗</a></div>
+        <div class="lab-bottom"><span>指针变量本身也占内存。地址值 ≠ 地址处的对象值。</span><button data-tab="syntax">打开语法图谱 →</button></div>
+      </section>
+      <section id="syntax" class="page"><div class="eyebrow mint">THE POINTER ATLAS</div><h1>一张图谱，读懂指针语法<span>。</span></h1><p class="page-intro">从声明中的名字出发：先看括号，再看后缀 [] / ()，最后看 *。每条语法都有对应的内存实验。</p><div class="syntax-explainer"><div><code>int *p[3];</code><p>p 是数组 → 有 3 个元素 → 每个元素是 int 指针。</p></div><span>≠</span><div><code>int (*p)[3];</code><p>p 是指针 → 指向一个含 3 个 int 的完整数组。</p></div></div><div id="syntax-cards" class="syntax-cards"></div><div class="atlas-note"><b>声明小陷阱：</b><code>int *p, q;</code> 只让 p 成为指针，q 仍然是 int。<code>*</code> 属于每个声明符。<br><b>函数参数：</b><code>void f(int a[10]);</code> 的 a 调整为 int *；函数内 sizeof(a) 得到指针大小，长度需要另外传入。<br><b>打印地址：</b><code>printf("%p", (void *)p);</code> 适用于对象指针；%p 的文本形式由实现决定。函数指针没有通用的 %p 可移植打印方式。</div></section>
+      <section id="model" class="page"><div class="eyebrow mint">A MODEL YOU CAN TRUST</div><h1>看清模型，也看清边界<span>。</span></h1><p class="page-intro">这里展示的是受控的逐步教学模型。它把 C 语义转为可观察的状态，不编译或执行任意 C 程序。</p><div class="model-grid"><article class="model-card"><span class="model-index">01 / REPRESENTATION</span><h2>明确的表示约定</h2><p>模型使用 8 位字节、4 字节 int、8 字节对象指针与函数指针、8 字节 size_t / ptrdiff_t、1 字节字符和 bool，以及小端序。模拟函数地址只表示符号，不伪造机器指令。</p><p>C 标准并不保证这些大小、指针表示、字节序或全零空指针。NULL 在本模型显示为全零；这是模型约定。</p></article><article class="model-card"><span class="model-index">02 / ADDRESS SPACE</span><h2>让地址帮助你理解</h2><p>栈从 0x1000、静态区从 0x4000、堆从 0x8000、代码符号区从 0xC000 开始。对象按模型中的自然对齐分配，数组元素连续。</p><p>真实实现的局部对象顺序、地址、结构体填充以及 malloc / realloc 行为可能不同。成功、失败和搬迁路径在各示例中明确选择。静态对象和函数符号在第一次相关步骤引入视图，这并不表示它们的存储期在该语句才开始。</p></article><article class="model-card"><span class="model-index">03 / LIFETIME</span><h2>失效，不等于被清零</h2><p>?? 表示未初始化或不确定的字节。free 或作用域结束后，对象标为失效，保留的字节只作历史回看，不能继续读取。指向结束生命周期对象的指针值变为不确定；原地址仅作历史标签。</p><p>free 不会自动把指针置 NULL，也不保证物理字节被擦除。只有显式赋值 p = NULL 才会改写 p。</p></article><article class="model-card"><span class="model-index">04 / SAFETY</span><h2>停止展示不保证的结果</h2><p>到达未定义行为时，演示在违规操作前停止。它不会替 C 标准指定“崩溃”“乱码”或某个输出。类型约束违规单独标为需要编译诊断，不能当成正常运行。</p><p>示例按动态执行顺序展开，函数体内每个演示语句分别执行。这里的代码片段需要适当头文件和入口才能构成完整 C 程序。</p></article></div><div class="source-box"><div class="eyebrow">REFERENCE LIBRARY</div><h2>参考资料</h2><p>C17 为核心；C23 的 nullptr 等新增特性单独列出。以下链接需要联网，实验本身完全离线可用。</p><div id="source-links"></div></div></section>
+      <footer><span>Memory Lens <b>/</b> C 指针实验室</span><span>先观察，再理解。每个字节都有迹可循。</span></footer>
+    </main>
+  </div>
+  <script>
+/* Deterministic teaching memory. This is not a C compiler or a host-memory reader. */
+(function (global) {
+  'use strict';
+  const sizes = {int:4,char:1,'unsigned char':1,bool:1,ptr:8,size_t:8,ptrdiff_t:8,function:1};
+  const Stop = class extends Error {};
+  const baseType = t => t.endsWith('[]') ? t.slice(0,-2) : t;
+  const hex = n => n == null ? 'NULL' : '0x'+Number(n).toString(16).toUpperCase().padStart(8,'0');
+  class Memory {
+    constructor() {
+      this.rows=[]; this.next={stack:0x1000,static:0x4000,heap:0x8000,code:0xC000};
+      this.events=[]; this.output=[]; this.diagnostic=null;
+    }
+    startStep(){this.events=[];}
+    row(name){const r=this.rows.findLast(r=>r.name===name); if(!r)throw Error('Unknown object: '+name); return r;}
+    addr(name,offset=0){return this.row(name).address+offset;}
+    locate(address,size=1){return this.rows.findLast(r=>address>=r.address && address+size<=r.address+r.size);}
+    alloc(name,type,value,opts={}){
+      const region=opts.region||'stack', unit=sizes[baseType(type)];
+      if(!unit)throw Error('Unknown type: '+type);
+      let values=typeof value==='string' && type==='char[]' ? Array.from(value,c=>c.charCodeAt(0)) : value;
+      const size=opts.size || (type.endsWith('[]') ? unit*(values?.length||1) : unit);
+      const alignment=type==='function'?1:Math.min(unit,8);
+      const address=opts.address ?? Math.ceil(this.next[region]/alignment)*alignment;
+      if(this.rows.some(r=>r.status==='live'&&address<r.address+r.size&&address+size>r.address))throw Error('Overlapping allocation: '+name);
+      this.next[region]=Math.max(this.next[region],address+size);
+      const r={name,type,address,size,region,status:'live',readonly:!!opts.readonly,label:opts.label||'',fields:opts.fields||[],scope:opts.scope||'',bytes:Array(size).fill(null),pointers:[],value:values};
+      this.rows.push(r);
+      if(type==='function'){r.value=value;}
+      else if(type.endsWith('[]')){if(values!==undefined)values.forEach((v,i)=>this.encode(r,i*unit,baseType(type),v));}
+      else this.encode(r,0,type,values);
+      this.events.push({action:'alloc',address,size,name,before:'未分配',after:this.describe(r)});return address;
+    }
+    encode(r,offset,type,value){
+      const size=sizes[type]; if(value===undefined){r.bytes.fill(null,offset,offset+size);if(type==='ptr')r.pointers.push({offset,value:undefined});return;}
+      let n=BigInt(value===null?0:value); n=BigInt.asUintN(size*8,n);
+      for(let i=0;i<size;i++)r.bytes[offset+i]=Number((n>>BigInt(i*8))&255n);
+      if(type==='ptr'){
+        const old=r.pointers.find(p=>p.offset===offset);
+        let target=this.rows.findLast(x=>x!==r&&x.status==='live'&&x.address===value)||this.rows.findLast(x=>x!==r&&x.status==='live'&&value>x.address&&value<=x.address+x.size);
+        const oldTarget=old?.targetName?this.rows.findLast(x=>x.name===old.targetName&&x.status==='live'):null;
+        const arithmetic=/(?:\+\+|--|\+=|-=|\+\s*\d)/.test(this.currentCode||'');
+        if(arithmetic&&oldTarget&&value>=oldTarget.address&&value<=oldTarget.address+oldTarget.size)target=oldTarget;
+        for(const x of this.rows){if(x.type.endsWith('[]')&&x.status==='live'&&value>=x.address&&value<=x.address+x.size&&new RegExp('\\b'+x.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*\\+').test(this.currentCode||''))target=x;}
+        r.pointers=r.pointers.filter(p=>p.offset!==offset);r.pointers.push({offset,value:value===0?null:value,invalid:false,targetName:target?.name,ownerLabel:r.label});
+      }
+    }
+    decode(r,offset,type){
+      const size=sizes[type]; const bytes=r.bytes.slice(offset,offset+size);
+      if(bytes.some(v=>v===null))return undefined;
+      let n=0n;for(let i=0;i<size;i++)n|=BigInt(bytes[i])<<BigInt(i*8);
+      if(type==='int'||type==='ptrdiff_t')n=BigInt.asIntN(size*8,n);
+      return type==='ptr'&&n===0n?null:Number(n);
+    }
+    read(where,type){
+      const named=typeof where==='string', r=named?this.row(where):this.locate(where,sizes[type||'int']);
+      const t=type||(named?baseType(r.type):'int'),address=named?r.address:where;
+      if(!r||r.status!=='live')this.fail('读取不属于存活对象的内存。');
+      const size=sizes[t];if(!size)throw Error('Unknown read type: '+t);
+      if(address+size>r.address+r.size)this.fail('读取超出对象边界。');
+      const value=this.decode(r,address-r.address,t);
+      if(value===undefined)this.fail('尝试读取不确定值；此教学示例在这里停止，不展示伪造结果。');
+      this.events.push({action:'read',address,size,name:r.name,value,type:t});return value;
+    }
+    write(name,value){const r=this.row(name);return this.writeAt(r.address,baseType(r.type),value);}
+    writeAt(address,type,value){
+      const size=sizes[type],r=this.locate(address,size);
+      if(!r||r.status!=='live')this.fail('写入不属于存活对象的内存。');
+      if(r.readonly)this.fail('修改不可写对象（例如字符串字面量）是未定义行为。');
+      const offset=address-r.address,before=this.decode(r,offset,type);
+      this.encode(r,offset,type,value);
+      if(r.type.endsWith('[]')){const u=sizes[baseType(r.type)];r.value=Array.from({length:Math.floor(r.size/u)},(_,i)=>this.decode(r,i*u,baseType(r.type)));}
+      else r.value=this.decode(r,0,baseType(r.type));
+      this.events.push({action:'write',address,size,name:r.name,before,after:value,type});return value;
+    }
+    endLifetime(r,status){
+      r.status=status;
+      this.rows.filter(owner=>owner.status==='live').forEach(owner=>owner.pointers.forEach(p=>{
+        if(typeof p.value==='number'&&(p.targetName?p.targetName===r.name:(p.value>=r.address&&p.value<r.address+r.size))){p.invalid=true;owner.bytes.fill(null,p.offset,p.offset+8);}
+      }));
+      this.events.push({action:status,address:r.address,size:r.size,name:r.name,before:'存活',after:'生命周期结束'});
+    }
+    free(where){
+      if(where===null||where===0){this.log('free(NULL)：无操作。');return;}
+      const r=typeof where==='string'?this.row(where):this.rows.findLast(r=>r.address===where&&r.region==='heap');
+      if(!r||r.region!=='heap'||r.status!=='live')this.fail('只能释放尚未释放的动态分配块的起始指针。');
+      this.endLifetime(r,'freed');
+    }
+    expire(name){this.endLifetime(this.row(name),'expired');}
+    log(text){this.output.push(String(text));this.events.push({action:'output',text:String(text)});}
+    fail(message,kind='ub'){this.diagnostic={message,kind};throw new Stop(message);}
+    describe(r){
+      if(r.type==='function')return String(r.value);
+      if(r.type==='ptr'){const p=r.pointers.find(p=>p.offset===0);return p?.invalid?'不确定（原 '+hex(p.value)+'）':p?.value===undefined?'未初始化':hex(p.value);}
+      if(r.type.endsWith('[]')){
+        const u=sizes[baseType(r.type)],vals=Array.from({length:Math.floor(r.size/u)},(_,i)=>this.decode(r,i*u,baseType(r.type)));
+        if(r.type==='char[]')return '"'+vals.map(v=>v===undefined?'?':v===0?'\\0':String.fromCharCode(v)).join('')+'"';
+        return '['+vals.map(v=>v===undefined?'?':r.type==='ptr[]'?hex(v):v).join(', ')+']';
+      }
+      const v=this.decode(r,0,r.type);return v===undefined?'未初始化':String(v);
+    }
+    snapshot(){return JSON.parse(JSON.stringify({rows:this.rows.map(r=>({...r,display:this.describe(r)})),events:this.events,output:this.output,diagnostic:this.diagnostic}));}
+  }
+  function simulate(scenario){
+    const m=new Memory(),snapshots=[m.snapshot()];
+    for(const step of scenario.steps){
+      m.startStep();m.currentCode=step.code;try{step.run?.(m);}catch(e){if(!(e instanceof Stop))throw Error(scenario.id+' / '+step.code+': '+e.message);}
+      snapshots.push(m.snapshot());if(m.diagnostic)break;
+    }
+    return snapshots;
+  }
+  global.PointerMemory={Memory,simulate,hex,sizes};
+})(typeof window==='undefined'?globalThis:window);
+
+</script><script>
+/* C17 pointer lessons. Each entry follows execution order, including expanded calls. */
+(function (global) {
+  'use strict';
+  const source = 'https://en.cppreference.com/w/c/language/pointer.html';
+  const ptr = (m, name) => m.read(name, 'ptr');
+  const deref = (m, name, type = 'int') => m.read(ptr(m, name), type);
+  const textAt = (m, address) => {
+    let n = 0;
+    while (m.read(address + n, 'char') !== 0) n++;
+    return n;
+  };
+
+  const scenarios = [
+    {
+      id: 'address', no: 1, title: '地址、解引用与改指向', category: '基础',
+      description: '把指针对象和被指向对象分开观察：存地址、读数据、写数据、换目标。',
+      syntax: ['int *p = &n;', 'int x = *p;', '*p = 25;', 'p = &k;'],
+      takeaway: 'p 的值是地址；&p 是指针对象自己的地址；*p 表示该地址处的 int 对象。写 p 与写 *p 改变的是不同内存。', source,
+      steps: [
+        { code: 'int n = 10;', text: '创建 int 对象 n，4 个字节保存 10：低地址字节是 0A。', run: m => m.alloc('n', 'int', 10) },
+        { code: 'int k = 20;', text: '创建另一个独立 int 对象 k。', run: m => m.alloc('k', 'int', 20) },
+        { code: 'int *p = &n;', text: '&n 取得 n 的地址；p 自己占 8 个模拟字节，并存下这个地址。', run: m => m.alloc('p', 'ptr', m.addr('n'), { label: 'int *' }) },
+        { code: 'int x = *p;', text: '先从 p 读取目标地址，再从该地址读取 int；x 得到 10。n 和 p 都没有被修改。', run: m => m.alloc('x', 'int', deref(m, 'p')) },
+        { code: '*p = 25;', text: '沿 p 找到 n，修改 n 的 4 个字节；p 的地址值保持不变。', run: m => m.writeAt(ptr(m, 'p'), 'int', 25) },
+        { code: 'p = &k;', text: '只改写 p 保存的地址；箭头从 n 移到 k，n 仍是 25。', run: m => m.write('p', m.addr('k')) },
+        { code: '*p += 5;', text: '读取当前目标 k 的 20，再把 25 写回 k。', run: m => { const a = ptr(m, 'p'); m.writeAt(a, 'int', m.read(a, 'int') + 5); } },
+        { code: 'int *q = p;', text: '复制 p 的地址值到独立指针对象 q；并没有复制 k 对象。', run: m => m.alloc('q', 'ptr', ptr(m, 'p'), { label: 'int *' }) },
+        { code: '*q = 31;', text: 'q 和 p 指向同一个 k，所以通过 q 写入后，通过 p 也能读到 31。', run: m => m.writeAt(ptr(m, 'q'), 'int', 31) },
+        { code: 'printf("%d %d\\n", n, *p);', text: '最后 n 是 25，p 的当前目标 k 是 31。输出只是读取，不改写这些对象。', run: m => m.log(m.read('n') + ' ' + deref(m, 'p')) }
+      ]
+    },
+    {
+      id: 'alias', no: 2, title: '多个指针，共用一个对象', category: '基础',
+      description: '观察别名：两份地址值可以指向同一份数据。',
+      syntax: ['int *q = p;', 'p == q', '*q = 42;', 'q = NULL;'],
+      takeaway: '复制指针会产生新的指针对象，却不会产生新的被指向对象。修改目标会被所有有效别名观察到；修改某一个指针不会改动其它指针。', source,
+      steps: [
+        { code: 'int n = 7;', text: '创建唯一的数据对象 n。', run: m => m.alloc('n', 'int', 7) },
+        { code: 'int *p = &n;', text: 'p 保存 n 的地址。', run: m => m.alloc('p', 'ptr', m.addr('n'), { label: 'int *' }) },
+        { code: 'int *q = p;', text: 'q 保存相同地址；此时两条箭头都指向 n。', run: m => m.alloc('q', 'ptr', ptr(m, 'p'), { label: 'int *' }) },
+        { code: 'int same = (p == q);', text: '两个指针指向同一对象，地址比较结果为 1。', run: m => m.alloc('same', 'int', +(ptr(m, 'p') === ptr(m, 'q'))) },
+        { code: '*p = 42;', text: '通过 p 修改 n；q 的字节没变，但它观察到的目标值也变成 42。', run: m => m.writeAt(ptr(m, 'p'), 'int', 42) },
+        { code: 'int x = *q;', text: '通过 q 读取同一对象，x 得到 42。', run: m => m.alloc('x', 'int', deref(m, 'q')) },
+        { code: 'q = NULL;', text: '把 q 改成空指针，仅移除 q 的箭头；n 没有被释放，p 也没有改变。', run: m => m.write('q', null) },
+        { code: '*p = 11;', text: 'p 仍指向存活的 n，因此这次写入有效。', run: m => m.writeAt(ptr(m, 'p'), 'int', 11) },
+        { code: 'printf("%d\\n", n);', text: '输出 11。q 为 NULL 并不会使其它有效指针失效。', run: m => m.log(m.read('n')) }
+      ]
+    },
+    {
+      id: 'pass-value', no: 3, title: '指针参数，也按值传递', category: '基础',
+      description: '进入函数，看到独立的形参指针；修改形参指向与修改目标对象的差别。',
+      syntax: ['void move(int *q, int *dst);', 'move(p, &k);', 'q = dst;', '*q = 99;'],
+      takeaway: 'C 的实参按值传递。形参 q 是 p 的地址值副本；q = dst 不会改 p，但 *q = 99 会改 q 当前指向的对象。代码按调用后的实际执行顺序展开。', source,
+      steps: [
+        { code: 'void move(int *q, int *dst);', text: '函数原型只声明参数类型，此行不创建形参对象。' },
+        { code: 'int n = 1;', text: '调用者创建 n。', run: m => m.alloc('n', 'int', 1) },
+        { code: 'int k = 2;', text: '调用者创建 k。', run: m => m.alloc('k', 'int', 2) },
+        { code: 'int *p = &n;', text: '调用者的 p 指向 n。', run: m => m.alloc('p', 'ptr', m.addr('n'), { label: 'int * · 调用者' }) },
+        { code: 'move(p, &k);', kind: 'call', text: '进入 move：读取 p 的值，复制到新形参 q；dst 保存 &k。三个指针对象彼此独立。', run: m => { m.alloc('q', 'ptr', ptr(m, 'p'), { scope: 'move', label: 'int * · 形参' }); m.alloc('dst', 'ptr', m.addr('k'), { scope: 'move', label: 'int * · 形参' }); } },
+        { code: 'void move(int *q, int *dst)', text: '展开正在执行的函数。形参内存已在调用步骤创建。' },
+        { code: '{', text: '进入函数体，尚未修改数据。' },
+        { code: 'q = dst;', text: '只改写形参 q 的地址值，使 q 指向 k；调用者的 p 仍指向 n。', run: m => m.write('q', ptr(m, 'dst')) },
+        { code: '*q = 99;', text: '沿现在的 q 写入 k；这是对调用者对象的真实修改。', run: m => m.writeAt(ptr(m, 'q'), 'int', 99) },
+        { code: '}', kind: 'return', text: 'move 返回，形参 q 和 dst 生命周期结束；调用者的 n、k、p 仍存活。', run: m => { m.expire('q'); m.expire('dst'); } },
+        { code: '*p = 7;', text: '返回调用者后，p 仍指向 n，所以被改成 7 的是 n。', run: m => m.writeAt(ptr(m, 'p'), 'int', 7) },
+        { code: 'printf("%d %d\\n", n, k);', text: '最终输出 7 99：换形参地址与通过形参写目标，是两个不同操作。', run: m => m.log(m.read('n') + ' ' + m.read('k')) }
+      ]
+    },
+    {
+      id: 'swap', no: 4, title: '传地址，让函数交换数据', category: '基础',
+      description: '逐行进入 swap：参数地址、临时值和两次目标写入都可见。',
+      syntax: ['void swap(int *x, int *y);', 'swap(&a, &b);', 'int t = *x;', '*x = *y;', '*y = t;'],
+      takeaway: '把 &a 和 &b 传入函数，形参保存调用者对象的地址；通过 *x、*y 改写调用者的对象，交换真正发生在 a 和 b 的内存中。', source,
+      steps: [
+        { code: 'void swap(int *x, int *y);', text: '函数原型；没有运行时内存变化。' },
+        { code: 'int a = 3;', text: '调用者创建 a，初值 3。', run: m => m.alloc('a', 'int', 3) },
+        { code: 'int b = 9;', text: '调用者创建 b，初值 9。', run: m => m.alloc('b', 'int', 9) },
+        { code: 'swap(&a, &b);', kind: 'call', text: '进入 swap；形参 x 保存 &a，形参 y 保存 &b。', run: m => { m.alloc('x', 'ptr', m.addr('a'), { scope: 'swap', label: 'int * · 形参' }); m.alloc('y', 'ptr', m.addr('b'), { scope: 'swap', label: 'int * · 形参' }); } },
+        { code: 'void swap(int *x, int *y)', text: '按执行顺序展开函数定义。' },
+        { code: '{', text: '进入函数体。' },
+        { code: 'int t = *x;', text: '读取 x 指向的 a，把原值 3 保存到独立局部变量 t。', run: m => m.alloc('t', 'int', deref(m, 'x'), { scope: 'swap' }) },
+        { code: '*x = *y;', text: '读取 b 的 9，写入 a。临时变量 t 仍保存原来的 3。', run: m => { const to = ptr(m, 'x'); m.writeAt(to, 'int', deref(m, 'y')); } },
+        { code: '*y = t;', text: '读取 t 的 3，写入 b；交换完成。', run: m => m.writeAt(ptr(m, 'y'), 'int', m.read('t')) },
+        { code: '}', kind: 'return', text: '函数返回；x、y、t 生命周期结束，a 和 b 保留交换后的值。', run: m => { m.expire('x'); m.expire('y'); m.expire('t'); } },
+        { code: 'printf("%d %d\\n", a, b);', text: '调用者观察到 9 3。', run: m => m.log(m.read('a') + ' ' + m.read('b')) }
+      ]
+    },
+    {
+      id: 'double-pointer', no: 5, title: '二级指针，修改指针本身', category: '基础',
+      description: '箭头连成两级：pp 指向 p，p 指向 int；函数可以改写调用者的 p。',
+      syntax: ['int **pp = &p;', '**pp = 6;', 'void rebind(int **out, int *dst);', '*out = dst;'],
+      takeaway: '要修改调用者的 int * 变量，传它的地址 int **。*pp 是指针对象 p；**pp 才是 p 指向的 int 对象。', source,
+      steps: [
+        { code: 'void rebind(int **out, int *dst);', text: '声明函数：out 指向 int * 对象，dst 指向 int 对象。' },
+        { code: 'int a = 5;', text: '创建 a。', run: m => m.alloc('a', 'int', 5) },
+        { code: 'int b = 8;', text: '创建 b。', run: m => m.alloc('b', 'int', 8) },
+        { code: 'int *p = &a;', text: '第一级：p 保存 a 的地址。', run: m => m.alloc('p', 'ptr', m.addr('a'), { label: 'int *' }) },
+        { code: 'int **pp = &p;', text: '第二级：pp 保存的是 p 自己的地址，建立 pp → p → a 的链。', run: m => m.alloc('pp', 'ptr', m.addr('p'), { label: 'int **' }) },
+        { code: '**pp = 6;', text: '读取 pp 找到 p，再读取 p 找到 a；最终只写入 a 的 4 个字节。', run: m => { const pObject = ptr(m, 'pp'); const a = m.read(pObject, 'ptr'); m.writeAt(a, 'int', 6); } },
+        { code: 'rebind(pp, &b);', kind: 'call', text: 'out 获得 p 的地址；dst 获得 b 的地址。函数现在能够定位调用者的指针对象 p。', run: m => { m.alloc('out', 'ptr', ptr(m, 'pp'), { scope: 'rebind', label: 'int ** · 形参' }); m.alloc('dst', 'ptr', m.addr('b'), { scope: 'rebind', label: 'int * · 形参' }); } },
+        { code: 'void rebind(int **out, int *dst)', text: '展开函数定义；接下来修改的是 *out，也就是调用者的 p。' },
+        { code: '{', text: '进入函数体。' },
+        { code: '*out = dst;', text: '沿 out 定位 p，把 b 的地址写进 p。p 的 8 个字节改变，a 和 b 的整数值都不改变。', run: m => m.writeAt(ptr(m, 'out'), 'ptr', ptr(m, 'dst')) },
+        { code: '}', kind: 'return', text: '函数形参结束生命周期；调用者的 pp 仍指向 p，而 p 已经指向 b。', run: m => { m.expire('out'); m.expire('dst'); } },
+        { code: '*p = 30;', text: 'p 的新目标是 b，因此 b 变成 30。', run: m => m.writeAt(ptr(m, 'p'), 'int', 30) },
+        { code: '**pp += 1;', text: '沿两级链读到 b 的 30，再写回 31；pp 和 p 的地址值保持不变。', run: m => { const target = m.read(ptr(m, 'pp'), 'ptr'); m.writeAt(target, 'int', m.read(target, 'int') + 1); } }
+      ]
+    },
+    {
+      id: 'arithmetic', no: 6, title: '数组、指针运算与尾后地址', category: '数组与字符串',
+      description: '按元素移动，按元素计算距离；合法尾后地址可以形成，但不能用于取值。',
+      syntax: ['int *p = a;', 'p += 2;', 'q - p', 'p < q', 'p[i] == *(p + i)', 'int *end = a + 4;'],
+      takeaway: 'int * 加 1 移动 sizeof(int) 个字节。减法和有序比较应在同一数组范围内使用（包括尾后指针）；尾后指针不指向可解引用的元素。', source,
+      steps: [
+        { code: 'int a[4] = {10, 20, 30, 40};', text: '4 个 int 连续排列，共 16 个字节；每个元素占 4 字节。', run: m => m.alloc('a', 'int[]', [10, 20, 30, 40], { label: 'int[4]' }) },
+        { code: 'int *p = a;', text: 'a 在此表达式中转换为首元素地址；p 指向 a[0]。', run: m => m.alloc('p', 'ptr', m.addr('a'), { label: 'int *' }) },
+        { code: 'int *q = a + 3;', text: 'a + 3 是第 4 个元素的地址，偏移 3 × 4 = 12 字节。', run: m => m.alloc('q', 'ptr', m.addr('a', 12), { label: 'int *' }) },
+        { code: 'p += 2;', text: 'p 前进 2 个 int，地址增加 8 字节，指向 a[2]；数组内容不变。', run: m => m.write('p', ptr(m, 'p') + 8) },
+        { code: 'ptrdiff_t d = q - p;', text: '指针差的单位是元素：12 字节与 8 字节偏移相差 1 个 int，因此 d = 1。', run: m => m.alloc('d', 'ptrdiff_t', (ptr(m, 'q') - ptr(m, 'p')) / 4) },
+        { code: 'int before = (p < q);', text: 'p 和 q 属于同一数组；a[2] 位于 a[3] 前面，结果为 1。', run: m => m.alloc('before', 'int', +(ptr(m, 'p') < ptr(m, 'q'))) },
+        { code: 'p--;', text: '指针后退一个 int，地址减少 4 字节，现在指向 a[1]。', run: m => m.write('p', ptr(m, 'p') - 4) },
+        { code: 'p[1] = 77;', text: 'p[1] 等价于 *(p + 1)，所以实际修改 a[2] 的 4 个字节。', run: m => m.writeAt(ptr(m, 'p') + 4, 'int', 77) },
+        { code: 'int x = *(a + 2);', text: '用加法与解引用读取 a[2]，x 得到 77。', run: m => m.alloc('x', 'int', m.read(m.addr('a', 8), 'int')) },
+        { code: 'int *end = a + 4;', text: '合法形成数组尾后地址。它恰好位于最后一个元素之后，但那里没有 a[4]。', run: m => m.alloc('end', 'ptr', m.addr('a', 16), { label: 'int * · one-past' }) },
+        { code: 'ptrdiff_t len = end - a;', text: '尾后指针可参与同一数组内的差值计算，结果为 4 个元素。', run: m => m.alloc('len', 'ptrdiff_t', (ptr(m, 'end') - m.addr('a')) / 4) },
+        { code: 'int done = (end == a + 4);', text: '可以比较尾后地址；结果为 1，不需要读取尾后内存。', run: m => m.alloc('done', 'int', +(ptr(m, 'end') === m.addr('a', 16))) },
+        { code: 'int bad = *end;', kind: 'warning', text: '错误演示：尾后指针不能解引用。即使该数值地址碰巧属于另一个对象，也不能把它当作 a[4] 读取。', run: m => { ptr(m, 'end'); m.fail('end 是 a 的尾后指针；*end 不指向数组元素，读取它是未定义行为。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'precedence', no: 7, title: '三种 ++，改变的对象不同', category: '数组与字符串',
+      description: '并排理解 *p++、(*p)++、*++p：旧地址、目标值与新地址。',
+      syntax: ['*p++  →  *(p++)', '(*p)++', '*++p  →  *(++p)', '++*p  →  ++(*p)'],
+      takeaway: '后缀 ++ 优先于一元 *；括号会改变被递增的对象。每一步展示完整表达式结束后的状态，不声称表达式内部存在唯一机器执行顺序。', source,
+      steps: [
+        { code: 'int a[3] = {10, 20, 30};', text: '准备连续的三个 int。', run: m => m.alloc('a', 'int[]', [10, 20, 30], { label: 'int[3]' }) },
+        { code: 'int *p = a;', text: 'p 从 a[0] 开始。', run: m => m.alloc('p', 'ptr', m.addr('a'), { label: 'int *' }) },
+        { code: 'int x = *p++;', text: '按 *(p++) 解析：用 p 的旧地址取得 10，x = 10；到本行结束时 p 已前进到 a[1]。', run: m => { const old = ptr(m, 'p'); const value = m.read(old, 'int'); m.alloc('x', 'int', value); m.write('p', old + 4); } },
+        { code: 'int y = (*p)++;', text: '递增的是 p 指向的 int：y 取得旧值 20，a[1] 变成 21；p 没移动。', run: m => { const target = ptr(m, 'p'); const old = m.read(target, 'int'); m.alloc('y', 'int', old); m.writeAt(target, 'int', old + 1); } },
+        { code: 'int z = *++p;', text: '按 *(++p) 解析：先取得递增后的指针值，再从 a[2] 取出 30，z = 30。', run: m => { const target = ptr(m, 'p') + 4; m.write('p', target); m.alloc('z', 'int', m.read(target, 'int')); } },
+        { code: '++*p;', text: '按 ++(*p) 解析：只把当前目标 a[2] 从 30 改为 31，p 仍指向 a[2]。', run: m => { const target = ptr(m, 'p'); m.writeAt(target, 'int', m.read(target, 'int') + 1); } },
+        { code: 'printf("%d %d %d\\n", x, y, z);', text: '输出 10 20 30；数组最终为 {10, 21, 31}。', run: m => m.log(m.read('x') + ' ' + m.read('y') + ' ' + m.read('z')) }
+      ]
+    },
+    {
+      id: 'array-pointer', no: 8, title: '指向元素，还是指向整个数组', category: '数组与字符串',
+      description: '地址起点相同，类型决定步长：int * 与 int (*)[3] 的 sizeof 和 +1。',
+      syntax: ['int *p = a;', 'int (*r)[3] = &a;', 'sizeof a', 'sizeof p', 'sizeof *r', '(*r)[2]'],
+      takeaway: '数组对象不是指针对象。a 通常转换为 int *，&a 是 int (*)[3]；sizeof 与取址不会触发数组到指针转换。相同起始地址不代表相同类型或相同步长。', source,
+      steps: [
+        { code: 'int a[3] = {10, 20, 30};', text: 'a 是一个 int[3] 对象，模拟大小为 12 字节。', run: m => m.alloc('a', 'int[]', [10, 20, 30], { label: 'int[3]' }) },
+        { code: 'int *p = a;', text: 'a 转换成首个 int 的地址；p 的目标类型为 int，步长 4 字节。', run: m => m.alloc('p', 'ptr', m.addr('a'), { label: 'int * · 步长 4B' }) },
+        { code: 'int (*r)[3] = &a;', text: '&a 取得整个数组的地址；r 的目标类型为 int[3]，步长 12 字节。', run: m => m.alloc('r', 'ptr', m.addr('a'), { label: 'int (*)[3] · 步长 12B' }) },
+        { code: 'size_t s0 = sizeof a;', text: 'sizeof 的操作数保持数组类型，所以结果是 3 × 4 = 12。没有读取数组元素。', run: m => m.alloc('s0', 'size_t', 12) },
+        { code: 'size_t s1 = sizeof p;', text: 'sizeof p 是指针对象大小，本教学模型为 8 字节；不读取 p 保存的地址值。', run: m => m.alloc('s1', 'size_t', 8) },
+        { code: 'size_t s2 = sizeof *p;', text: '*p 的类型是 int，所以结果为 4。非 VLA 的 sizeof 不实际解引用 p。', run: m => m.alloc('s2', 'size_t', 4) },
+        { code: 'size_t s3 = sizeof *r;', text: '*r 的类型是 int[3]，所以结果为 12；不读取 r，也不读取数组。', run: m => m.alloc('s3', 'size_t', 12) },
+        { code: 'p++;', text: 'p 地址增加 4 字节，指向 a[1]。数组内容没有变化。', run: m => m.write('p', ptr(m, 'p') + 4) },
+        { code: 'r++;', text: 'r 地址增加 12 字节，形成整个数组对象的尾后指针；此时不能通过 *r 访问数组。', run: m => m.write('r', ptr(m, 'r') + 12) },
+        { code: 'r = &a;', text: '把 r 重新指回整个 a。', run: m => m.write('r', m.addr('a')) },
+        { code: '(*r)[2] = 99;', text: '先通过 r 指定数组，再访问第 3 个 int；实际写入 a 的起点后 8 字节。', run: m => m.writeAt(ptr(m, 'r') + 8, 'int', 99) }
+      ]
+    },
+    {
+      id: 'matrix', no: 9, title: '二维数组，按一整行移动', category: '数组与字符串',
+      description: '一段连续内存，划分为两行；行指针每次前进 3 个 int。',
+      syntax: ['int a[2][3];', 'int (*r)[3] = a;', 'r[i][j]', '*(*(a + i) + j)', 'sizeof *r'],
+      takeaway: 'a 的首元素是一行 int[3]，因此转换结果是 int (*)[3]。二维数组不是 int **；这里没有额外的“行指针表”，只有按行连续的整数。', source,
+      steps: [
+        { code: 'int a[2][3] = {{1, 2, 3}, {4, 5, 6}};', text: '连续 24 字节：第 0 行位于偏移 0～11，第 1 行位于偏移 12～23。行之间没有指针对象。', run: m => m.alloc('a', 'int[]', [1, 2, 3, 4, 5, 6], { label: 'int[2][3] · 每行 12B' }) },
+        { code: 'int (*r)[3] = a;', text: 'a 转换为第一行的地址；r 指向一整行 int[3]。', run: m => m.alloc('r', 'ptr', m.addr('a'), { label: 'int (*)[3]' }) },
+        { code: 'int x = r[0][2];', text: '第 0 行第 2 列，偏移 (0 × 3 + 2) × 4 = 8 字节，读到 3。', run: m => m.alloc('x', 'int', m.read(ptr(m, 'r') + 8, 'int')) },
+        { code: 'r++;', text: '行指针前进一行，地址增加 sizeof(int[3]) = 12 字节，现在指向第 1 行。', run: m => m.write('r', ptr(m, 'r') + 12) },
+        { code: '(*r)[1] = 50;', text: '*r 指定当前行；[1] 选择该行第 2 个 int，修改原数组 a[1][1]。', run: m => m.writeAt(ptr(m, 'r') + 4, 'int', 50) },
+        { code: 'int y = *(*(a + 1) + 1);', text: 'a + 1 选择第二行，该行转换为元素指针后再 +1，读取 a[1][1] 的 50。', run: m => m.alloc('y', 'int', m.read(m.addr('a', 16), 'int')) },
+        { code: 'r--;', text: '后退一整行，重新指向第 0 行。', run: m => m.write('r', ptr(m, 'r') - 12) },
+        { code: 'r[1][2] = 60;', text: '从当前行前进 1 行、再前进 2 列，实际写入 a[1][2]，起始偏移 20 字节。', run: m => m.writeAt(ptr(m, 'r') + 20, 'int', 60) },
+        { code: 'size_t row_bytes = sizeof *r;', text: 'r 的目标类型始终是 int[3]，sizeof *r = 12。此处不读取指针或数组内容。', run: m => m.alloc('row_bytes', 'size_t', 12) }
+      ]
+    },
+    {
+      id: 'pointer-array', no: 10, title: '指针数组，内存里保存一张地址表', category: '数组与字符串',
+      description: '与二维数组对照：数组元素本身是指针，每个槽位存储一个目标地址。',
+      syntax: ['int *v[3];', 'v[0] = &c;', '*v[1] = 25;', 'int **pp = v;', '**pp = 200;'],
+      takeaway: 'int *v[3] 是含 3 个 int * 的数组；int (*r)[3] 是指向 int[3] 的指针。v 转换后的类型是 int **，它首先指向地址表的一个槽位。', source,
+      steps: [
+        { code: 'int a = 10;', text: '创建独立对象 a。', run: m => m.alloc('a', 'int', 10) },
+        { code: 'int b = 20;', text: '创建独立对象 b。', run: m => m.alloc('b', 'int', 20) },
+        { code: 'int c = 30;', text: '创建独立对象 c。', run: m => m.alloc('c', 'int', 30) },
+        { code: 'int *v[3] = {&a, &b, &c};', text: 'v 占 3 × 8 = 24 字节，依次存下三个地址。这里真的有三个指针槽位。', run: m => m.alloc('v', 'ptr[]', [m.addr('a'), m.addr('b'), m.addr('c')], { label: 'int *[3] · 地址表' }) },
+        { code: '*v[1] = 25;', text: '读取地址表第 2 个槽位 v[1]，沿它的地址把 b 改为 25；槽位自身不改变。', run: m => m.writeAt(m.read(m.addr('v', 8), 'ptr'), 'int', 25) },
+        { code: 'v[0] = &c;', text: '改写第 1 个指针槽位，令 v[0] 改为指向 c；a 的 10 保持不变。', run: m => m.writeAt(m.addr('v'), 'ptr', m.addr('c')) },
+        { code: 'int **pp = v;', text: 'v 转换为首个指针槽位的地址；pp 指向 v[0]，形成 pp → v[0] → c。', run: m => m.alloc('pp', 'ptr', m.addr('v'), { label: 'int **' }) },
+        { code: 'pp++;', text: 'pp 的目标类型是 int *，所以前进 8 字节，指向第 2 个指针槽位 v[1]。', run: m => m.write('pp', ptr(m, 'pp') + 8) },
+        { code: '**pp = 200;', text: '先读取 pp 指向的地址表槽位，再沿槽位中保存的地址修改 b，b 变成 200。', run: m => m.writeAt(m.read(ptr(m, 'pp'), 'ptr'), 'int', 200) },
+        { code: 'pp[1] = &a;', text: '从当前槽位向后一个指针元素，改写 v[2]，让它指向 a。', run: m => m.writeAt(ptr(m, 'pp') + 8, 'ptr', m.addr('a')) },
+        { code: '*pp[1] = 11;', text: 'pp[1] 取出 v[2] 的地址；沿该地址把 a 改成 11。', run: m => m.writeAt(m.read(ptr(m, 'pp') + 8, 'ptr'), 'int', 11) },
+        { code: 'size_t table_bytes = sizeof v;', text: 'sizeof v 保留数组类型，结果是 3 个指针 × 8 字节 = 24。', run: m => m.alloc('table_bytes', 'size_t', 24) }
+      ]
+    },
+    {
+      id: 'strings', no: 11, title: '字符数组、字面量与结束字节', category: '数组与字符串',
+      description: '把每个字符的实际字节显示出来，观察 \\0 如何决定字符串边界。',
+      syntax: ['char s[] = "cat";', 'const char *p = "cat";', 'char *q = s;', 'q[0] = \'b\';', 's[2] = \'\\0\';'],
+      takeaway: 'char s[] = "cat" 创建可写数组，包含 63 61 74 00 四个字节。字符串字面量具有静态存储期，修改它是未定义行为；即使 char * 能保存其地址也不能写它。', source,
+      steps: [
+        { code: 'char s[] = "cat";', text: '创建可写字符数组 s，保存 c、a、t 和结束字节 \\0。字符串长度 3，数组大小 4。', run: m => m.alloc('s', 'char[]', 'cat\0', { label: 'char[4] · 可写字符数组' }) },
+        { code: 'const char *p = "cat";', text: 'p 指向静态存储期的字符串字面量；字面量在本步引入内存视图。const char * 也限制通过 p 写入。', run: m => { m.alloc('lit', 'char[]', 'cat\0', { region: 'static', readonly: true, label: '"cat" · 字符串字面量' }); m.alloc('p', 'ptr', m.addr('lit'), { label: 'const char *' }); } },
+        { code: 'char *q = s;', text: 'q 指向可写数组 s 的第一个字符；与 p 的静态字面量目标区分开。', run: m => m.alloc('q', 'ptr', m.addr('s'), { label: 'char *' }) },
+        { code: 'q[0] = \'b\';', text: '仅把 s 的首字节由 63 改为 62，数组字符串变成 "bat"；静态字面量仍是 "cat"。', run: m => m.writeAt(ptr(m, 'q'), 'char', 98) },
+        { code: 'q++;', text: 'char * 每次移动 1 字节，现在 q 指向字符 a。', run: m => m.write('q', ptr(m, 'q') + 1) },
+        { code: 'char first = *p;', text: '读取字面量的首字符 c（63）；读取字面量是有效操作。', run: m => m.alloc('first', 'char', deref(m, 'p', 'char')) },
+        { code: 'char stop = s[3];', text: '读到值为 0 的结束字符。它是一个真实存在的字节，不是浏览器添加的标记。', run: m => m.alloc('stop', 'char', m.read(m.addr('s', 3), 'char')) },
+        { code: 'size_t cap = sizeof s;', text: '数组包括终止字节，sizeof s = 4；此处不读取字符内容。', run: m => m.alloc('cap', 'size_t', 4) },
+        { code: 'size_t len = strlen(s);', text: '从 s[0] 开始逐字节读取，遇到 s[3] 的 00 停止；长度不包含终止字节，所以为 3。', run: m => m.alloc('len', 'size_t', textAt(m, m.addr('s'))) },
+        { code: 's[2] = \'\\0\';', text: '把原来的 t（74）写成 00。数组仍有 4 字节，但字符串提前在索引 2 处结束。', run: m => m.writeAt(m.addr('s', 2), 'char', 0) },
+        { code: 'size_t short_len = strlen(s);', text: '现在只需读取 62 61 00，得到长度 2；后面的字节仍存在于数组中。', run: m => m.alloc('short_len', 'size_t', textAt(m, m.addr('s'))) },
+        { code: 'char *t = "dog";', text: 'C17 允许 char * 保存字符串字面量地址，但这不会让字面量变得可写。', run: m => { m.alloc('lit2', 'char[]', 'dog\0', { region: 'static', readonly: true, label: '"dog" · 字符串字面量' }); m.alloc('t', 'ptr', m.addr('lit2'), { label: 'char * · 目标不可写' }); } },
+        { code: 't[0] = \'D\';', kind: 'warning', text: '错误演示：试图改写字符串字面量。教学器在写入前停止，不伪造一次成功写入。', run: m => m.writeAt(ptr(m, 't'), 'char', 68) }
+      ]
+    }
+  ];
+
+  global.POINTER_SCENARIOS = (global.POINTER_SCENARIOS || []).concat(scenarios);
+})(typeof window === 'undefined' ? globalThis : window);
+
+</script><script>
+/* C17 pointer lab: explicit traces for type, allocation and safety scenarios.
+ * All addresses, widths, byte order and structure layouts belong to the lab's
+ * declared simulation model. A UB trace stops before producing a result.
+ */
+(function () {
+  'use strict';
+
+  const advanced = [
+    {
+      id: 'void-bytes', no: 12, title: 'void * 与对象的字节表示', category: '类型与抽象',
+      description: '同一对象可以经过 void * 传递，再恢复正确类型；unsigned char * 可逐字节观察对象表示。',
+      syntax: ['void *pv = &n;', 'int *p = pv; /* C 中无需强制转换 */', 'unsigned char *bytes = (unsigned char *)&n;', 'bytes[i] /* 读取或写入对象表示的一个字节 */'],
+      takeaway: 'void * 保留对象地址，但不能直接解引用或按标准 C 做指针算术。字符类型允许访问对象表示；本模型的小端 32 位 int 决定这里的字节和值，其他实现可能不同。任意改写字节并不总能得到该类型的有效值。',
+      source: 'https://en.cppreference.com/c/language/object',
+      steps: [
+        { code: 'int n = 0x12345678;', text: '建立 n。本模型的四个字节按地址递增为 78 56 34 12：低有效字节在低地址。', run: m => { m.alloc('n', 'int', 0x12345678); } },
+        { code: 'void *pv = &n;', text: 'pv 保存 n 的地址。没有复制 n 的四字节内容，也没有改变 n。', run: m => { m.alloc('pv', 'ptr', m.addr('n'), { label: 'void *' }); } },
+        { code: 'int *p = pv;', text: '在 C 中，对象指针与 void * 可以相互隐式转换；恢复为原来的 int * 后才能按 int 访问。', run: m => { m.alloc('p', 'ptr', m.read('pv', 'ptr'), { label: 'int *，恢复原类型' }); } },
+        { code: 'int same = *p;', text: '先从 p 读取地址，再从该地址读取四字节 int。same 得到 305419896。', run: m => { m.alloc('same', 'int', m.read(m.read('p', 'ptr'), 'int')); } },
+        { code: 'unsigned char *bytes = (unsigned char *)&n;', text: 'bytes 指向 n 的首字节。字符类型访问对象表示是别名规则允许的例外。', run: m => { m.alloc('bytes', 'ptr', m.addr('n'), { label: 'unsigned char *，步长 1 B' }); } },
+        { code: 'unsigned char lo = bytes[0];', text: '只读取最低地址的一个字节：0x78。unsigned char 观察的是对象表示。', run: m => { m.alloc('lo', 'char', m.read(m.read('bytes', 'ptr'), 'char'), { label: 'unsigned char，0x78' }); } },
+        { code: 'unsigned char hi = bytes[3];', text: 'bytes + 3 移动三字节，读取 n 的最高有效字节 0x12。', run: m => { m.alloc('hi', 'char', m.read(m.read('bytes', 'ptr') + 3, 'char'), { label: 'unsigned char，0x12' }); } },
+        { code: 'bytes[0] = 0xAB;', text: '实际改写 n 的首字节：78 → AB；其余三字节仍为 56 34 12。此特定改写在本模型中仍是有效的正 int。', run: m => { m.writeAt(m.read('bytes', 'ptr'), 'char', 0xAB); } },
+        { code: 'int changed = *p;', text: '按四字节 int 重新读取相同内存，得到 0x123456AB，即 305419947。字节写入已经改变 n。', run: m => { m.alloc('changed', 'int', m.read(m.read('p', 'ptr'), 'int')); } }
+      ]
+    },
+    {
+      id: 'const', no: 13, title: 'const 限定的是谁？', category: '类型与抽象',
+      description: '把“不能通过它改对象”和“这个指针不能改向”分开观察；约束违规作为诊断示例单独标明。',
+      syntax: ['const int *pc; /* pc 可改向；不能通过 *pc 写 int */', 'int * const cp = &n; /* cp 不可改向；*cp 可写 */', 'const int * const cpc = &other; /* 两者都受限制 */', '/* *pc = 3; 或 cp = &other; 都是约束违规，应诊断 */'],
+      takeaway: 'const int * 限制访问路径，并不必然说明原对象是 const。int * const 限制指针对象本身。丢弃限定符不等于取得修改真正 const 对象的许可；修改真正 const 对象是未定义行为。',
+      source: 'https://en.cppreference.com/c/language/const',
+      steps: [
+        { code: 'int n = 10;', text: 'n 是可修改的 int，四字节内容初值为 10。', run: m => { m.alloc('n', 'int', 10); } },
+        { code: 'int other = 20;', text: 'other 是另一个可修改的 int，拥有独立地址。', run: m => { m.alloc('other', 'int', 20); } },
+        { code: 'const int *pc = &n;', text: 'pc 指向 n。pc 本身可改写，但 *pc 是 const int 左值，不能用它赋值。', run: m => { m.alloc('pc', 'ptr', m.addr('n'), { label: 'const int *：只读访问路径' }); } },
+        { code: 'pc = &other;', text: '合法改向：只改变 pc 存放的地址；n 与 other 的内容都不变。', run: m => { m.write('pc', m.addr('other')); } },
+        { code: 'int * const cp = &n;', text: 'cp 的地址字节在初始化后固定；指向的 n 仍是可修改对象。', run: m => { m.alloc('cp', 'ptr', m.addr('n'), { readonly: true, label: 'int * const：指针固定' }); } },
+        { code: '*cp = 30;', text: '合法写入：读取 cp 的地址，再把 n 改为 30。cp 的地址字节没有变化。', run: m => { m.writeAt(m.read('cp', 'ptr'), 'int', 30); } },
+        { code: 'const int * const cpc = &other;', text: 'cpc 既不能改向，也不能通过它写 other；底层 other 依旧由其声明决定是否可修改。', run: m => { m.alloc('cpc', 'ptr', m.addr('other'), { readonly: true, label: 'const int * const：双重限制' }); } },
+        { code: 'int value = *cpc;', text: '读取合法，value 得到 20。const 并不禁止读取。', run: m => { m.alloc('value', 'int', m.read(m.read('cpc', 'ptr'), 'int')); } },
+        { code: '/* 约束违规示例：*pc = 40; cp = &other; cpc = &n; */', text: '这些语句没有进入执行轨迹：它们违反赋值约束，编译器应给出诊断。不能把它们伪装成运行时写入。', kind: 'warning', run: m => { m.log('约束诊断：不能通过 const int 左值赋值；不能改写 const 指针对象。内存不发生变化。'); } }
+      ]
+    },
+    {
+      id: 'struct', no: 14, title: '结构体指针与成员地址', category: '类型与抽象',
+      description: '查看 ->、(*p).member 和成员指针如何定位同一结构体内部的字节。',
+      syntax: ['struct Point { int x; int y; };', 'struct Point *p = &s;', 'p->x /* 等价于 (*p).x */', 'int *member = &p->y;'],
+      takeaway: 'p->member 等价于 (*p).member，括号不可省略为 *p.member。成员指针可以直接修改该成员。本例采用 x@+0、y@+4、共 8 B 的模拟布局；成员间及结构体尾部的填充由具体实现决定。',
+      source: 'https://en.cppreference.com/c/language/operator_member_access',
+      steps: [
+        { code: 'struct Point { int x; int y; };', text: '声明类型本身不创建 s。接下来用模拟布局展示每个成员占用的字节。', run: m => { m.log('模型布局：Point.x 偏移 0，Point.y 偏移 4，sizeof(Point) = 8 B。C 标准没有保证此具体布局。'); } },
+        { code: 'struct Point s = {3, 4};', text: '创建结构体 s：首四字节保存 x = 3，后四字节保存 y = 4。', run: m => { m.alloc('s', 'int[]', [3, 4], { size: 8, label: 'struct Point（模拟布局）', fields: [{ name: 'x', type: 'int', offset: 0 }, { name: 'y', type: 'int', offset: 4 }] }); } },
+        { code: 'struct Point *p = &s;', text: 'p 保存整个结构体的首地址，并未复制两个成员。', run: m => { m.alloc('p', 'ptr', m.addr('s'), { label: 'struct Point *' }); } },
+        { code: 'p->x = 7;', text: '根据 p 的地址和 x 的成员偏移定位首四字节，只改 x：3 → 7。', run: m => { m.writeAt(m.read('p', 'ptr'), 'int', 7); } },
+        { code: '(*p).y = 9;', text: '先通过 *p 得到结构体，再访问 y；实际改写 s + 4 的四字节：4 → 9。', run: m => { m.writeAt(m.read('p', 'ptr') + 4, 'int', 9); } },
+        { code: 'int *member = &p->y;', text: 'member 保存 y 的地址，比结构体首地址多 4 B。这里只取地址，不读取 y 的内容。', run: m => { m.alloc('member', 'ptr', m.read('p', 'ptr') + 4, { label: 'int *，指向 s.y' }); } },
+        { code: '*member = 12;', text: '通过成员指针把同一份 s.y 改为 12；p 和 member 的指向关系保持不变。', run: m => { m.writeAt(m.read('member', 'ptr'), 'int', 12); } },
+        { code: 'int total = p->x + p->y;', text: '读取结构体的两段成员内存，total = 7 + 12 = 19。', run: m => { const base = m.read('p', 'ptr'); m.alloc('total', 'int', m.read(base, 'int') + m.read(base + 4, 'int')); } }
+      ]
+    },
+    {
+      id: 'function-pointer', no: 15, title: '函数指针、typedef 与函数表', category: '类型与抽象',
+      description: '地址可以定位函数。跟随三次间接调用，查看形参、返回值和函数表中的地址。',
+      syntax: ['int (*fp)(int) = inc;', 'fp(3); /* 与 (*fp)(3) 都能调用 */', 'typedef int (*Unary)(int);', 'Unary table[2] = {inc, square}; /* 函数指针数组 */'],
+      takeaway: 'int (*fp)(int) 中的括号把 fp 声明为函数指针；int *fp(int) 则声明返回 int * 的函数。函数名会转换为函数指针，因此 inc 与 &inc 都可初始化 fp。代码区只显示函数符号，不能将模拟地址或字节当作真实机器指令。',
+      source: 'https://en.cppreference.com/c/language/pointer',
+      steps: [
+        { code: 'int inc(int n) { return n + 1; }', text: '登记 inc 函数符号。定义函数不会执行它的函数体；代码区符号不展示伪造的指令字节。', run: m => { m.alloc('inc', 'function', 'int inc(int)', { region: 'code', size: 1, label: '函数符号 inc；不是指令内存' }); } },
+        { code: 'int square(int n) { return n * n; }', text: '登记 square 函数符号，它拥有不同的代码区标识地址。', run: m => { m.alloc('square', 'function', 'int square(int)', { region: 'code', size: 1, label: '函数符号 square；不是指令内存' }); } },
+        { code: 'typedef int (*Unary)(int);', text: 'Unary 是函数指针类型别名，typedef 本身不创建存储对象。', run: m => { m.log('Unary = 指向 int(int) 函数的指针。'); } },
+        { code: 'Unary fp = inc;', text: 'fp 的八字节保存 inc 的模拟符号地址。函数指针本身是可以赋值的对象。', run: m => { m.alloc('fp', 'ptr', m.addr('inc'), { label: 'Unary = int (*)(int)' }); } },
+        { code: 'int first = fp(3); // 调用进入 inc', text: '读 fp 来选择 inc，将实参 3 复制到形参 n。first 等待返回值；函数体在下一步展开。', kind: 'call', run: m => { m.read('fp', 'ptr'); m.alloc('first', 'int', undefined, { label: '等待 inc 返回' }); m.alloc('inc.n.1', 'int', 3, { scope: 'inc 调用 1', label: 'inc 的形参 n' }); } },
+        { code: 'return n + 1; // inc 返回到 first', text: 'inc 读取自己的形参，计算 3 + 1，把 4 写入 first，然后形参生命周期结束。', kind: 'return', run: m => { m.write('first', m.read('inc.n.1', 'int') + 1); m.expire('inc.n.1'); } },
+        { code: 'fp = &square;', text: '改写 fp 的地址，现在它定位 square；已经算出的 first = 4 不受影响。', run: m => { m.write('fp', m.addr('square')); } },
+        { code: 'int second = (*fp)(4); // 调用进入 square', text: '(*fp)(4) 与 fp(4) 都能间接调用。创建 square 的形参 n = 4，等待函数返回。', kind: 'call', run: m => { m.read('fp', 'ptr'); m.alloc('second', 'int', undefined, { label: '等待 square 返回' }); m.alloc('square.n.1', 'int', 4, { scope: 'square 调用 1', label: 'square 的形参 n' }); } },
+        { code: 'return n * n; // square 返回到 second', text: 'square 读取 n = 4，得到 16，写入 second，再结束形参的生命周期。', kind: 'return', run: m => { const n = m.read('square.n.1', 'int'); m.write('second', n * n); m.expire('square.n.1'); } },
+        { code: 'Unary table[2] = {inc, square};', text: '连续的函数指针数组保存两个符号地址；每个元素在本模型占 8 B。', run: m => { m.alloc('table', 'ptr[]', [m.addr('inc'), m.addr('square')], { label: 'Unary[2]，函数指针表' }); } },
+        { code: 'int third = table[0](10); // 再次进入 inc', text: '读取 table[0] 里的 inc 地址，通过表选择函数。创建新的形参 n = 10。', kind: 'call', run: m => { m.read(m.addr('table'), 'ptr'); m.alloc('third', 'int', undefined, { label: '等待函数表调用返回' }); m.alloc('inc.n.2', 'int', 10, { scope: 'inc 调用 2', label: 'inc 第二次调用的 n' }); } },
+        { code: 'return n + 1; // inc 返回到 third', text: '第二次 inc 调用读取自己的 n，返回 11；函数表的两个地址都没有变化。', kind: 'return', run: m => { m.write('third', m.read('inc.n.2', 'int') + 1); m.expire('inc.n.2'); } }
+      ]
+    },
+    {
+      id: 'heap', no: 16, title: 'malloc、calloc 与 free', category: '动态内存',
+      description: '对比未初始化堆字节与全零堆字节，完成判空、写入、读取、释放和置空。',
+      syntax: ['#include <stdlib.h>', 'int *p = malloc(2 * sizeof *p);', 'int *q = calloc(2, sizeof *q);', 'if (p == NULL) { /* 处理失败 */ }', 'free(p); p = NULL;'],
+      takeaway: 'malloc 不初始化所分配的字节；calloc 将所有字节置零。这里的 int 全零表示数值 0，但全零字节不普遍保证空指针或浮点零。free 结束堆对象的生命周期；释放不会自动把 p 置空，覆盖 p = NULL 是另一个操作。',
+      source: 'https://en.cppreference.com/c/memory/calloc',
+      steps: [
+        { code: 'int *p = malloc(2 * sizeof *p);', text: '模拟选择分配成功：堆上取得 8 B 未初始化存储；?? 不等于零。sizeof *p 在这里不解引用 p。', run: m => { const a = m.alloc('malloc block', 'int[]', [undefined, undefined], { region: 'heap', size: 8, label: 'malloc：两个 int，初始字节未知' }); m.alloc('p', 'ptr', a, { label: 'int *，拥有 malloc 块' }); } },
+        { code: 'if (p == NULL) return 1;', text: '检查返回值。本次 p 非空，失败分支跳过；真实程序必须处理分配失败。', run: m => { m.read('p', 'ptr'); m.log('malloc 成功路径：p != NULL。'); } },
+        { code: 'p[0] = 7;', text: '将首个 int 的四字节写为 7；第二个元素仍未初始化，不能读取其值。', run: m => { m.writeAt(m.read('p', 'ptr'), 'int', 7); } },
+        { code: 'p[1] = 9;', text: 'p + 1 跨过 sizeof(int) = 4 B，在第二个元素的地址写入 9。', run: m => { m.writeAt(m.read('p', 'ptr') + 4, 'int', 9); } },
+        { code: 'int *q = calloc(2, sizeof *q);', text: '另一个 8 B 堆块全部置零。本模型中两个 int 都为 0；p 所指的堆块不受影响。', run: m => { const a = m.alloc('calloc block', 'int[]', [0, 0], { region: 'heap', size: 8, label: 'calloc：8 B 均为 00' }); m.alloc('q', 'ptr', a, { label: 'int *，拥有 calloc 块' }); } },
+        { code: 'if (q == NULL) { free(p); return 1; }', text: '检查 q。本次成功；若失败，示例的失败分支会先释放已成功分配的 p 块。', run: m => { m.read('q', 'ptr'); m.log('calloc 成功路径：q != NULL。'); } },
+        { code: 'q[1] = p[0] + p[1];', text: '读取 p 块内两个已初始化的 int，把和 16 写到 q 块第二个元素。', run: m => { const p = m.read('p', 'ptr'); const q = m.read('q', 'ptr'); m.writeAt(q + 4, 'int', m.read(p, 'int') + m.read(p + 4, 'int')); } },
+        { code: 'free(p);', text: '释放 malloc 块，堆对象生命周期结束。p 不会自动变成 NULL；旧地址仅作历史示意，不能继续使用。', run: m => { m.free(m.read('p', 'ptr')); } },
+        { code: 'p = NULL;', text: '直接覆盖指针对象 p，不读取旧的无效指针值。此操作没有再次释放内存。', run: m => { m.write('p', null); } },
+        { code: 'free(q);', text: '释放 calloc 块。释放后的历史字节即使仍可见，也不再属于可访问的活对象。', run: m => { m.free(m.read('q', 'ptr')); } },
+        { code: 'q = NULL;', text: '将 q 也覆盖为空指针。两个堆块均已释放，两个拥有者均为空。', run: m => { m.write('q', null); } }
+      ]
+    },
+    {
+      id: 'realloc', no: 17, title: 'realloc：搬迁与失效的旧地址', category: '动态内存',
+      description: '用临时指针承接扩容结果，查看数据复制、新增未知字节以及旧别名失效。',
+      syntax: ['int *tmp = realloc(p, new_count * sizeof *p);', 'if (tmp == NULL) { /* p 的原分配仍有效 */ }', 'p = tmp; /* 仅成功后接管新分配 */', '/* 成功后旧 p、旧 alias 均不可继续使用 */'],
+      takeaway: 'realloc 成功会使旧指针失效，原地扩容也一样；本例展示允许发生的搬迁。失败时返回 NULL 并保留原分配，因此不能直接 p = realloc(p, ...)。新增部分未初始化；本例用正的新大小，避免零大小的标准差异。',
+      source: 'https://en.cppreference.com/c/memory/realloc',
+      steps: [
+        { code: 'int *p = malloc(2 * sizeof *p);', text: '成功取得 8 B 原分配，两个元素尚未初始化。', run: m => { const a = m.alloc('old allocation', 'int[]', [undefined, undefined], { region: 'heap', size: 8, label: '原分配，2 个 int' }); m.alloc('p', 'ptr', a, { label: '原分配的拥有者' }); } },
+        { code: 'if (p == NULL) return 1;', text: '先确认原分配成功。本轨迹继续成功路径。', run: m => { m.read('p', 'ptr'); m.log('原分配成功。'); } },
+        { code: 'p[0] = 4;', text: '初始化第一个 int。', run: m => { m.writeAt(m.read('p', 'ptr'), 'int', 4); } },
+        { code: 'p[1] = 8;', text: '初始化第二个 int，原分配的内容现在为 [4, 8]。', run: m => { m.writeAt(m.read('p', 'ptr') + 4, 'int', 8); } },
+        { code: 'int *alias = p;', text: 'alias 复制原地址，它只是别名，并不复制堆数据。', run: m => { m.alloc('alias', 'ptr', m.read('p', 'ptr'), { label: '旧别名：成功扩容后失效' }); } },
+        { code: 'int *tmp = realloc(p, 4 * sizeof *p);', text: '本次成功搬迁：新建 16 B 块，保留旧块前 8 B 的 [4, 8]，新增 8 B 为 ??，释放旧块。tmp 得到新地址；p 和 alias 的旧值已失效。', run: m => { const old = m.read('p', 'ptr'); const v0 = m.read(old, 'int'); const v1 = m.read(old + 4, 'int'); const fresh = m.alloc('new allocation', 'int[]', [v0, v1, undefined, undefined], { region: 'heap', size: 16, label: '扩容后的分配，前 8 B 复制而来' }); m.free(old); m.alloc('tmp', 'ptr', fresh, { label: 'realloc 成功返回的新地址' }); } },
+        { code: 'if (tmp == NULL) { free(p); return 1; }', text: '只检查 tmp。本次成功，失败分支不执行；若 realloc 失败，旧块未释放，该分支中的 p 仍有效。', run: m => { m.read('tmp', 'ptr'); m.log('realloc 成功路径；失败情形不是本轨迹的内存状态。'); } },
+        { code: 'p = tmp;', text: '用有效的新地址覆盖 p，不读取 p 原来的失效值。alias 仍然失效，不能拿它访问原内存。', run: m => { m.write('p', m.read('tmp', 'ptr')); } },
+        { code: 'p[2] = 12;', text: '初始化新分配第三个 int；前两个已复制的值仍是 4 和 8。', run: m => { m.writeAt(m.read('p', 'ptr') + 8, 'int', 12); } },
+        { code: 'p[3] = 16;', text: '初始化第四个 int，新块现在为 [4, 8, 12, 16]。', run: m => { m.writeAt(m.read('p', 'ptr') + 12, 'int', 16); } },
+        { code: 'tmp = NULL;', text: '接管完成后覆盖临时别名，p 仍保存新块地址。置空 tmp 不释放新块。', run: m => { m.write('tmp', null); } },
+        { code: 'free(p);', text: '使用当前有效的块首地址释放新分配。alias 依然是旧分配的失效历史值。', run: m => { m.free(m.read('p', 'ptr')); } },
+        { code: 'p = NULL;', text: '覆盖刚失效的 p。整个轨迹没有读取或比较扩容成功后的旧 alias。', run: m => { m.write('p', null); } }
+      ]
+    },
+    {
+      id: 'linked-list', no: 18, title: '链表：内存中的 next 地址', category: '动态内存',
+      description: '两个堆节点通过 next 成员连接；逐行展开遍历，看到游标如何沿地址移动。',
+      syntax: ['struct Node { int value; struct Node *next; };', 'a->next = b;', 'cur = cur->next;', 'while (cur != NULL) { /* 访问当前节点 */ }'],
+      takeaway: 'next 成员保存下一节点的地址，并不把下一节点复制进当前节点。模型布局为 value@+0、填充@+4…7、next@+8，共 16 B；填充标为 ??，具体偏移不是 C 标准保证。释放节点后不能再读它的 next，应先保存所需链接。',
+      source: 'https://en.cppreference.com/c/language/struct',
+      steps: [
+        { code: 'struct Node { int value; struct Node *next; };', text: '类型可以在自身声明中包含指向自身的指针。模型为两个节点选择 16 B 布局。', run: m => { m.log('Node 模型：value 4 B；padding 4 B；next 8 B。填充不是链表数据。'); } },
+        { code: 'struct Node *a = malloc(sizeof *a);', text: '成功取得第一个堆节点。value、next 以及填充字节尚未初始化。', run: m => { const a = m.alloc('node A', 'int[]', [undefined, undefined], { region: 'heap', size: 16, label: 'struct Node（模拟布局）', fields: [{ name: 'value', type: 'int', offset: 0 }, { name: 'next', type: 'ptr', offset: 8 }] }); m.alloc('a', 'ptr', a, { label: 'struct Node *' }); } },
+        { code: 'if (a == NULL) return 1;', text: '第一个节点分配成功，继续。', run: m => { m.read('a', 'ptr'); m.log('a != NULL，成功路径。'); } },
+        { code: 'struct Node *b = malloc(sizeof *b);', text: '成功取得第二个独立节点，其内容还未初始化。', run: m => { const b = m.alloc('node B', 'int[]', [undefined, undefined], { region: 'heap', size: 16, label: 'struct Node（模拟布局）', fields: [{ name: 'value', type: 'int', offset: 0 }, { name: 'next', type: 'ptr', offset: 8 }] }); m.alloc('b', 'ptr', b, { label: 'struct Node *' }); } },
+        { code: 'if (b == NULL) { free(a); return 1; }', text: '第二个节点分配成功。若失败，该分支负责释放已成功分配的第一个节点。', run: m => { m.read('b', 'ptr'); m.log('b != NULL，成功路径。'); } },
+        { code: 'a->value = 10;', text: '只写入 A 的 value 成员，填充及 next 尚未初始化。', run: m => { m.writeAt(m.read('a', 'ptr'), 'int', 10); } },
+        { code: 'a->next = b;', text: '读取 b 保存的地址，写入 A 内偏移 +8 的 next 成员。A 的 next 开始指向 B。', run: m => { const a = m.read('a', 'ptr'); m.writeAt(a + 8, 'ptr', m.read('b', 'ptr')); } },
+        { code: 'b->value = 20;', text: '写入 B 的 value = 20，A 中的内容没有变化。', run: m => { m.writeAt(m.read('b', 'ptr'), 'int', 20); } },
+        { code: 'b->next = NULL;', text: 'B 的 next 成员写入空指针，标记链尾；填充字节仍未指定。', run: m => { m.writeAt(m.read('b', 'ptr') + 8, 'ptr', null); } },
+        { code: 'struct Node *cur = a;', text: '建立遍历游标，cur 与 a 目前都保存 A 的地址。', run: m => { m.alloc('cur', 'ptr', m.read('a', 'ptr'), { label: '遍历游标 cur' }); } },
+        { code: 'int sum = 0;', text: '建立累计值 sum。链表节点并不会移动，之后只移动 cur 中的地址。', run: m => { m.alloc('sum', 'int', 0); } },
+        { code: 'while (cur != NULL) { // 第 1 次条件', text: 'cur 指向 A，判空成立，进入第一次循环。', run: m => { m.read('cur', 'ptr'); m.log('循环 1：访问节点 A。'); } },
+        { code: 'sum += cur->value; // 第 1 次循环', text: '读取 A.value = 10，将 sum 从 0 改为 10。', run: m => { m.write('sum', m.read('sum', 'int') + m.read(m.read('cur', 'ptr'), 'int')); } },
+        { code: 'cur = cur->next; // 第 1 次循环', text: '读取 A 内部的八字节 next 地址，把 cur 改向 B；节点 A 的内存没有改变。', run: m => { m.write('cur', m.read(m.read('cur', 'ptr') + 8, 'ptr')); } },
+        { code: 'while (cur != NULL) { // 第 2 次条件', text: 'cur 指向 B，判空仍成立，进入第二次循环。', run: m => { m.read('cur', 'ptr'); m.log('循环 2：访问节点 B。'); } },
+        { code: 'sum += cur->value; // 第 2 次循环', text: '读取 B.value = 20，把 sum 从 10 改为 30。', run: m => { m.write('sum', m.read('sum', 'int') + m.read(m.read('cur', 'ptr'), 'int')); } },
+        { code: 'cur = cur->next; // 第 2 次循环', text: '读取 B.next 的空指针，cur 变为 NULL。', run: m => { m.write('cur', m.read(m.read('cur', 'ptr') + 8, 'ptr')); } },
+        { code: 'while (cur != NULL) { // 第 3 次条件：退出', text: 'cur 为空，条件不成立。循环结束，sum = 30；没有解引用 NULL。', run: m => { m.read('cur', 'ptr'); m.log('遍历结束：sum = 30。'); } },
+        { code: 'free(a);', text: '释放节点 A。图中 A 的 next 只可作为历史记录，不能再读取它获取 B。', run: m => { m.free(m.read('a', 'ptr')); } },
+        { code: 'a = NULL;', text: '覆盖 a 的失效值；B 仍由独立变量 b 持有。', run: m => { m.write('a', null); } },
+        { code: 'free(b);', text: '用 b 持有的有效首地址释放节点 B。', run: m => { m.free(m.read('b', 'ptr')); } },
+        { code: 'b = NULL;', text: '覆盖 b 的失效值。两个节点均已释放，cur 之前就已为空。', run: m => { m.write('b', null); } }
+      ]
+    },
+    {
+      id: 'qualifiers', no: 19, title: 'restrict 与 volatile 访问', category: '类型与抽象',
+      description: '先用互不重叠的数组满足 restrict 契约，再观察 volatile 指针的显式读写。',
+      syntax: ['void copy(int *restrict out, const int *restrict in);', 'volatile int *vp = &status; /* 通过它访问 volatile int */', 'int * volatile p; /* 指针对象本身是 volatile */', '/* volatile 不提供原子性、线程同步或内存屏障 */'],
+      takeaway: 'restrict 是对所在块内访问方式的约束：被修改对象的相关访问必须遵守对应指针的访问路径。它并非简单的“地址一定不同”。volatile 使相关访问成为抽象机可观察的副作用，但不保证线程安全、原子性或同步。',
+      source: 'https://en.cppreference.com/c/language/restrict',
+      relatedSources: ['https://en.cppreference.com/c/language/volatile'],
+      steps: [
+        { code: 'int src[2] = {11, 22};', text: '创建源数组 src，两元素都已经初始化。', run: m => { m.alloc('src', 'int[]', [11, 22]); } },
+        { code: 'int dst[2] = {0, 0};', text: '创建独立目标数组 dst。两个数组的存储范围不重叠。', run: m => { m.alloc('dst', 'int[]', [0, 0]); } },
+        { code: 'copy(dst, src); // 进入 restrict 参数函数', text: '进入 void copy(int *restrict out, const int *restrict in)。复制形参地址；本次被写 dst 与被读 src 不重叠，满足契约。', kind: 'call', run: m => { m.alloc('copy.out', 'ptr', m.addr('dst'), { scope: 'copy', label: 'int *restrict out' }); m.alloc('copy.in', 'ptr', m.addr('src'), { scope: 'copy', label: 'const int *restrict in' }); } },
+        { code: 'out[0] = in[0]; // copy 函数体', text: '通过 in 读取 src[0] = 11，通过 out 写 dst[0] = 11。源数组没有改变。', run: m => { m.writeAt(m.read('copy.out', 'ptr'), 'int', m.read(m.read('copy.in', 'ptr'), 'int')); } },
+        { code: 'out[1] = in[1]; // copy 函数体', text: '同样将 src[1] = 22 复制到 dst[1]。两次修改都沿 out 访问路径进行。', run: m => { m.writeAt(m.read('copy.out', 'ptr') + 4, 'int', m.read(m.read('copy.in', 'ptr') + 4, 'int')); } },
+        { code: 'return; // 从 copy 返回', text: 'copy 返回。两个形参指针生命周期结束，src 与 dst 仍然存在。', kind: 'return', run: m => { m.expire('copy.out'); m.expire('copy.in'); } },
+        { code: 'volatile int status = 1;', text: '建立 volatile 限定的对象 status。演示单线程中的显式访问，不模拟设备或其他线程。', run: m => { m.alloc('status', 'int', 1, { label: 'volatile int，单线程示例' }); } },
+        { code: 'volatile int *vp = &status;', text: 'vp 指向 volatile int。读写 status 时保持 volatile 限定，不能经非 volatile 左值访问它。', run: m => { m.alloc('vp', 'ptr', m.addr('status'), { label: 'volatile int *' }); } },
+        { code: 'int seen = *vp;', text: '显式执行一次 volatile 读访问，取得 1。该访问是抽象机中的可观察副作用。', run: m => { m.alloc('seen', 'int', m.read(m.read('vp', 'ptr'), 'int')); m.log('volatile 读访问；没有原子操作、同步或内存屏障含义。'); } },
+        { code: '*vp = 2;', text: '显式执行一次 volatile 写访问，把 status 改为 2。它不因此成为原子写。', run: m => { m.writeAt(m.read('vp', 'ptr'), 'int', 2); m.log('volatile 写访问。'); } },
+        { code: 'int seen_again = *vp;', text: '再执行一次 volatile 读，取得本单线程示例刚写入的 2。此结果没有证明跨线程可见性。', run: m => { m.alloc('seen_again', 'int', m.read(m.read('vp', 'ptr'), 'int')); } }
+      ]
+    },
+    {
+      id: 'null', no: 20, title: 'NULL：合法判空与非法解引用', category: '边界与安全',
+      description: '空指针可以赋值、比较和传给 free；它不指向任何可供解引用的对象。',
+      syntax: ['#include <stddef.h> /* NULL */', 'int *p = NULL; /* 0 也是空指针常量 */', 'if (p != NULL) { /* 此后才可考虑解引用 */ }', 'free(NULL); /* 无操作 */', '*p /* p 为空时：未定义行为 */'],
+      takeaway: '空指针表示没有对象或函数。判断 p != NULL 只排除空值，还需确保类型、边界、初始化和生命周期都有效。空指针的实际位表示由实现决定；图中全零字节只是本模型选择。',
+      source: 'https://en.cppreference.com/c/types/NULL',
+      steps: [
+        { code: 'int *p = NULL;', text: 'p 初始化为空指针。本模型显示八个 00，但 C 标准不要求空指针表示一定全零。', run: m => { m.alloc('p', 'ptr', null, { label: 'int *，当前为空' }); } },
+        { code: 'int empty = (p == NULL);', text: '读取指针值并与空指针比较是合法操作，结果为 1。没有读取任何被指对象。', run: m => { m.alloc('empty', 'int', m.read('p', 'ptr') == null ? 1 : 0); } },
+        { code: 'if (p != NULL) { *p = 9; }', text: '条件为假，写入分支跳过，因此不会解引用空指针。', run: m => { m.read('p', 'ptr'); m.log('判空为假，跳过 *p = 9。'); } },
+        { code: 'free(p); // 此时等价于 free(NULL)', text: 'free 接收空指针时无操作。没有堆块被释放，也不会出现非法访问。', run: m => { m.free(m.read('p', 'ptr')); } },
+        { code: 'int x = 5;', text: '建立一个真实的可修改 int 对象。', run: m => { m.alloc('x', 'int', 5); } },
+        { code: 'p = &x;', text: '将有效的 x 地址写入 p，p 不再为空。', run: m => { m.write('p', m.addr('x')); } },
+        { code: 'if (p != NULL) { *p = 9; }', text: '本次条件为真，且 p 的类型、边界和生命周期均有效，因此把 x 改为 9。', run: m => { const p = m.read('p', 'ptr'); m.writeAt(p, 'int', 9); } },
+        { code: 'p = 0;', text: '整数常量表达式 0 转换为空指针值；x 的内容仍为 9。', run: m => { m.write('p', null); } },
+        { code: 'int bad = *p;', text: '空指针没有可解引用对象。这里触发未定义行为，轨迹立即停止，不生成 bad 的确定值。', kind: 'warning', run: m => { m.read('p', 'ptr'); m.fail('对空指针解引用：不存在被指对象。未定义行为后不提供确定结果。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'uninitialized', no: 21, title: '未初始化指针不是 NULL', category: '边界与安全',
+      description: '先展示未初始化的地址字节，再明确区分不求值的 sizeof 与真正读取指针值。',
+      syntax: ['int *p; /* 自动存储，值不确定 */', 'sizeof p; /* 非 VLA：不读取 p 的值 */', 'p = &x; /* 使用前初始化为有效地址 */', '/* if (p) 也会读取 p，不能验证未初始化指针 */'],
+      takeaway: '自动存储的指针如果没有初始化，其值不确定；?? 不是随机但可用的地址，也不是 NULL。赋值 p = &x 或 p = NULL 可以覆盖未知值。示例里的解引用先需要读取 p，因此在任何目标对象读取发生前就已出错。',
+      source: 'https://en.cppreference.com/c/language/initialization',
+      steps: [
+        { code: 'int *p;', text: '创建自动存储的指针对象，却没有初始化。八个 ?? 表示未知的对象表示，不能把它当成有效地址。', run: m => { m.alloc('p', 'ptr', undefined, { label: '未初始化的自动存储指针' }); } },
+        { code: 'int x = 7;', text: '建立 x = 7 不会自动让 p 指向 x；两个声明彼此独立。', run: m => { m.alloc('x', 'int', 7); } },
+        { code: 'size_t width = sizeof p;', text: 'p 的类型不是 VLA，sizeof 不求值其操作数。合法得到本模型指针宽度 8 B，没有读取 p 的未知字节。', run: m => { m.alloc('width', 'size_t', 8); } },
+        { code: '/* 正确修复应在使用前执行：p = &x; */', text: '修复方法是先写入有效地址。这里保留错误状态来展示诊断，注释不会执行赋值。', kind: 'warning', run: m => { m.log('修复提示：在解引用或判空之前初始化 p；仅检查 if(p) 并不能修复。'); } },
+        { code: 'int value = *p;', text: '求值 *p 必须先读取未初始化的 p。对这个自动存储指针的使用触发未定义行为，停止且不生成 value。', kind: 'warning', run: m => { m.fail('读取未初始化的自动存储指针：值不确定。不能选择一个假定地址继续解引用。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'bounds', no: 22, title: 'one-past：合法边界不能解引用', category: '边界与安全',
+      description: '数组尾后一位是合法的边界指针，可用于比较、相减和退回；它不是额外的数组元素。',
+      syntax: ['int *end = a + 3; /* a[3] 的尾后位置 */', 'ptrdiff_t count = end - a;', 'int *last = end - 1;', '/* *end 或形成 end + 1：未定义行为 */'],
+      takeaway: '指针算术限于同一数组的元素及尾后一位，步长由所指类型决定。尾后指针可形成、比较、相减或退回，不能解引用。即使该数值地址恰巧与另一对象重合，它也不会自动变成可访问那个对象的指针。',
+      source: 'https://en.cppreference.com/c/language/operator_arithmetic',
+      steps: [
+        { code: 'int a[3] = {10, 20, 30};', text: '数组有且仅有三个元素，在本模型连续占用 12 B。', run: m => { m.alloc('a', 'int[]', [10, 20, 30]); } },
+        { code: 'int *begin = a;', text: 'begin 指向 a[0]，也就是数组的首地址。', run: m => { m.alloc('begin', 'ptr', m.addr('a'), { label: 'a[0] 的地址' }); } },
+        { code: 'int *end = a + 3;', text: '移动 3 × 4 B，合法形成尾后一位 end。该边界不占用一个新的 int 元素。', run: m => { m.alloc('end', 'ptr', m.addr('a', 12), { label: 'one-past：仅边界，不可解引用' }); } },
+        { code: 'ptrdiff_t count = end - begin;', text: '同一数组的指针相减得到元素数而非字节数：(12 B) / (4 B) = 3。', run: m => { m.alloc('count', 'ptrdiff_t', (m.read('end', 'ptr') - m.read('begin', 'ptr')) / 4); } },
+        { code: 'int *last = end - 1;', text: '从尾后位置退回一个 int，last 合法指向数组最后一个元素 a[2]。', run: m => { m.alloc('last', 'ptr', m.read('end', 'ptr') - 4, { label: 'a[2] 的有效地址' }); } },
+        { code: 'int value = *last;', text: 'last 位于有效元素范围，读取 a[2] 的四字节值 30。', run: m => { m.alloc('value', 'int', m.read(m.read('last', 'ptr'), 'int')); } },
+        { code: 'int ordered = (last < end);', text: '同一数组内的元素位置与尾后位置可以作此比较，结果为 1；没有解引用 end。', run: m => { m.alloc('ordered', 'int', m.read('last', 'ptr') < m.read('end', 'ptr') ? 1 : 0); } },
+        { code: 'int bad = *end;', text: 'end 是尾后边界，不是 a[3] 对象。解引用属于未定义行为，停止且不产生 bad 值。', kind: 'warning', run: m => { m.read('end', 'ptr'); m.fail('解引用数组尾后一位：越过 a 的三个有效元素，不存在 a[3] 对象。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'lifetime', no: 23, title: '作用域结束后的悬空指针', category: '边界与安全',
+      description: '外层指针可以暂时指向内层对象；内层对象生命周期结束后，保留的历史地址不再可用。',
+      syntax: ['int *p = NULL;', '{ int local = 42; p = &local; }', '/* 离开块后 local 的生命周期结束 */', '/* 此后的 *p：未定义行为 */'],
+      takeaway: '地址没有自行“延长”对象的生命周期。local 的生命周期结束后，指向它或其尾后一位的指针值变为不确定值。图中的地址和字节只保留为历史记录；不会据此断言下一次读取仍得到 42。返回局部变量地址也有同类问题。',
+      source: 'https://en.cppreference.com/c/language/lifetime',
+      steps: [
+        { code: 'int *p = NULL;', text: '在外层创建 p，生命周期覆盖接下来的内层块。', run: m => { m.alloc('p', 'ptr', null, { label: '外层指针 p' }); } },
+        { code: '{ // 进入内层块', text: '进入新的作用域。接下来建立的 local 具有自动存储期。', run: m => { m.log('进入内层块。'); } },
+        { code: 'int local = 42;', text: '创建内层 local，在其生命周期内拥有有效地址和数值 42。', run: m => { m.alloc('local', 'int', 42, { scope: '内层块', label: '内层自动存储对象 local' }); } },
+        { code: 'p = &local;', text: '外层 p 保存 local 的地址。此时 local 活着，访问仍然合法。', run: m => { m.write('p', m.addr('local')); } },
+        { code: 'int valid = *p;', text: '在 local 生命周期内解引用 p，valid 得到 42。valid 在这里也属于内层块。', run: m => { m.alloc('valid', 'int', m.read(m.read('p', 'ptr'), 'int'), { scope: '内层块', label: '内层读取结果 valid' }); } },
+        { code: '} // 离开内层块', text: 'local 和 valid 的生命周期结束。p 自身仍存在，但指向 local 的值已变为不确定值，旧字节仅为历史示意。', run: m => { m.expire('local'); m.expire('valid'); m.log('对象生命周期结束；p 不再是可使用的对象地址。'); } },
+        { code: 'int invalid = *p;', text: '不能通过 p 访问生命周期已结束的 local。停止轨迹，不把历史的 42 当作确定的读取结果。', kind: 'warning', run: m => { m.fail('访问已经结束生命周期的局部对象：悬空指针的值不确定，解引用是未定义行为。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'aliasing', no: 24, title: '类型转换不授予别名访问许可', category: '边界与安全',
+      description: '对比合法的字符字节观察与违反有效类型规则的 float 解引用。',
+      syntax: ['unsigned char *bytes = (unsigned char *)&n;', 'unsigned char first = bytes[0]; /* 合法观察对象表示 */', 'float *bad = (float *)&n;', '/* float value = *bad; 不能按 float 左值读取 int 对象 */'],
+      takeaway: '强制转换只转换指针类型，不把 int 对象变成 float。访问须满足有效类型和对齐等规则；字符类型是对象表示访问的例外。不要根据这些字节伪造一个确定的 float 读取结果。此例假定模型中转换地址也符合 float 的对齐要求。',
+      source: 'https://en.cppreference.com/c/language/object',
+      steps: [
+        { code: 'int n = 0x3F800000;', text: '声明创建的是 int 对象，有效类型为 int。本模型字节为 00 00 80 3F；这仍不意味着可以直接按 float 读取。', run: m => { m.alloc('n', 'int', 0x3F800000); } },
+        { code: 'unsigned char *bytes = (unsigned char *)&n;', text: '字符指针可以观察 int 的对象表示，这不会改变有效类型。', run: m => { m.alloc('bytes', 'ptr', m.addr('n'), { label: 'unsigned char *，合法观察路径' }); } },
+        { code: 'unsigned char first = bytes[0];', text: '合法读取首个表示字节，本模型得到 0x00；n 的四字节完全不变。', run: m => { m.alloc('first', 'char', m.read(m.read('bytes', 'ptr'), 'char'), { label: 'unsigned char，0x00' }); } },
+        { code: 'int original = n;', text: '按对象的正确 int 类型读取，合法得到 1065353216。', run: m => { m.alloc('original', 'int', m.read('n', 'int')); } },
+        { code: 'float *bad = (float *)&n;', text: '在本模型的对齐假定下形成转换后的指针。转换不改 n 的字节，也不把 n 的有效类型改为 float。', run: m => { m.alloc('bad', 'ptr', m.addr('n'), { label: 'float *，不能用于读取这个 int' }); } },
+        { code: 'float value = *bad;', text: '经 float 左值读取 int 对象违反有效类型访问规则。停止，不展示一个假定的浮点结果。', kind: 'warning', run: m => { m.read('bad', 'ptr'); m.fail('有效类型违规：不能通过 float 左值访问这个已声明的 int 对象。此处是未定义行为。', 'ub'); } }
+      ]
+    },
+    {
+      id: 'c23', no: 25, title: 'C23 补充：nullptr', category: 'C23补充',
+      description: '此场景单独采用 C23，展示专用空指针常量转换为对象指针、函数指针和 bool。',
+      syntax: ['/* 以下需要 C23；不属于 C17 */', 'int *p = nullptr;', 'void (*fn)(void) = nullptr;', 'bool flag = nullptr; /* false */', '#include <stddef.h> /* 提供 nullptr_t 类型名 */'],
+      takeaway: 'C23 的 nullptr 是类型为 nullptr_t 的预定义空指针常量，可转换为相应指针类型的空值，也可转换为 bool 的 false。nullptr_t 类型名由 <stddef.h> 提供。它改善空值表达，但空指针仍然不能解引用或调用。',
+      source: 'https://en.cppreference.com/c/language/nullptr',
+      steps: [
+        { code: 'int *p = nullptr; // C23', text: 'nullptr 转换为 int * 的空指针值。本模型的八字节显示全零，仅代表所选模型。', run: m => { m.alloc('p', 'ptr', null, { label: 'int *，由 nullptr 初始化' }); } },
+        { code: 'void *v = nullptr; // C23', text: '同一常量也能转换为 void * 的空指针值；它不指向任何对象。', run: m => { m.alloc('v', 'ptr', null, { label: 'void *，空指针' }); } },
+        { code: 'int (*fn)(int) = nullptr; // C23', text: '函数指针也可以为空；此时不能调用 fn。没有建立或定位任何函数符号。', run: m => { m.alloc('fn', 'ptr', null, { label: 'int (*)(int)，空函数指针' }); } },
+        { code: 'bool absent = (p == nullptr); // C23', text: '合法比较 int * 与 nullptr，结果为 true，写入本模型的一字节 bool。', run: m => { m.alloc('absent', 'bool', m.read('p', 'ptr') == null); } },
+        { code: 'bool flag = nullptr; // C23', text: 'nullptr 转换为 bool 得到 false；这是值转换，未进行任何解引用。', run: m => { m.alloc('flag', 'bool', false); } },
+        { code: 'int x = 7;', text: '建立真实的 int 对象，准备让 p 持有有效对象地址。', run: m => { m.alloc('x', 'int', 7); } },
+        { code: 'p = &x;', text: 'p 从空值改为 x 的有效地址；v 与 fn 仍为空。', run: m => { m.write('p', m.addr('x')); } },
+        { code: 'if (p != nullptr) { *p = 9; } // C23', text: '此时 p 指向活着的 int 对象且非空，条件成立，通过它把 x 改为 9。', run: m => { m.writeAt(m.read('p', 'ptr'), 'int', 9); } }
+      ]
+    }
+  ];
+
+  window.POINTER_SCENARIOS = (window.POINTER_SCENARIOS || []).concat(advanced);
+})();
+
+</script><script>
+(function(){
+  'use strict';
+  window.POINTER_SCENARIOS.push({
+    id:'allocation-failure',no:26,title:'分配失败，保住原来的指针',category:'动态内存',
+    description:'单独选择 malloc 失败和 realloc 失败路径，观察空值与旧堆块的保留。',
+    syntax:['int *p = malloc(n * sizeof *p);','if (p == NULL) { /* 处理失败 */ }','int *tmp = realloc(p, new_size);','if (tmp != NULL) p = tmp;'],
+    takeaway:'malloc 失败只返回空指针，没有新堆块。realloc 失败不释放原块；临时变量避免覆盖唯一的拥有者。失败路径与成功搬迁路径都值得观察。',source:'https://en.cppreference.com/c/memory/realloc',
+    steps:[
+      {code:'int *p = malloc(2 * sizeof *p); // 失败路径',text:'模拟分配失败：只创建空指针 p，堆上没有出现任何分配块。',run:m=>m.alloc('p','ptr',null,{label:'int *'})},
+      {code:'if (p == NULL) { /* 处理分配失败 */ }',text:'判空成立，处理失败；不能继续执行 *p。此行只读取 p。',run:m=>{m.read('p','ptr');m.log('malloc 失败：没有可访问的堆块。');}},
+      {code:'p = malloc(2 * sizeof *p); // 本次成功',text:'选择一次成功分配：新建 8B 堆块，把它的地址写入 p。这不会读取 p 的旧空值。',run:m=>{const a=m.alloc('block','int[]',undefined,{region:'heap',size:8,label:'两个 int · malloc 未初始化'});m.write('p',a);}},
+      {code:'if (p == NULL) return 1;',text:'本次 p 非空，跳过退出分支。',run:m=>m.read('p','ptr')},
+      {code:'p[0] = 42;',text:'只初始化第一个 int；第二个 int 的四字节仍为 ??。',run:m=>m.writeAt(m.read('p','ptr'),'int',42)},
+      {code:'int *tmp = realloc(p, 4 * sizeof *p); // 失败路径',text:'模拟扩容失败，tmp 得到 NULL。旧分配仍存活，p 的值和目标字节都保持有效。',run:m=>{m.read('p','ptr');m.alloc('tmp','ptr',null,{label:'int * · 扩容失败'});}},
+      {code:'if (tmp != NULL) p = tmp;',text:'条件不成立，跳过 p = tmp；避免用 NULL 覆盖仍持有原分配的 p。',run:m=>m.read('tmp','ptr')},
+      {code:'int kept = p[0];',text:'失败后仍可通过有效 p 读取原来已初始化的 42；原块并未被 realloc 释放。',run:m=>m.alloc('kept','int',m.read(m.read('p','ptr'),'int'))},
+      {code:'free(p);',text:'使用有效的旧分配首地址释放原块。它现在才结束生命周期。',run:m=>m.free(m.read('p','ptr'))},
+      {code:'p = NULL;',text:'显式覆盖失效指针值，完成清理。',run:m=>m.write('p',null)}
+    ]
+  },{
+    id:'pointer-return',no:27,title:'返回指针，谁来保证生命周期',category:'基础',
+    description:'函数返回的是一个地址值；指向静态对象的返回指针可以在函数退出后继续使用。',
+    syntax:['int *counter(void);','int *p = counter();','static int n = 5;','return &n;'],
+    takeaway:'返回指针会复制地址值，不会复制或延长被指向对象的生命周期。静态对象在函数退出后继续存活；自动局部对象则不能这样返回并使用。安全边界课可观察后者。',source:'https://en.cppreference.com/c/language/storage_duration',
+    steps:[
+      {code:'int *counter(void);',text:'声明一个返回 int * 的函数；这与 int (*fp)(void) 函数指针声明不同。'},
+      {code:'int *p = counter(); // 进入函数',kind:'call',text:'开始调用；调用者的指针 p 等待函数返回的地址值。',run:m=>m.alloc('p','ptr',undefined,{label:'int * · 等待返回值'})},
+      {code:'static int n = 5; // counter 内',text:'引入静态对象 n。静态初始化发生于程序启动；本教学轨迹在首次相关访问时显示该对象，而非每次调用重新初始化。',run:m=>m.alloc('n','int',5,{region:'static',label:'static int · 整个程序期间存活'})},
+      {code:'return &n; // counter 返回',kind:'return',text:'返回静态 n 的地址，初始化调用者的 p。函数退出不会结束 n 的生命周期。',run:m=>m.write('p',m.addr('n'))},
+      {code:'*p += 1;',text:'调用者通过返回的有效地址读取并写入静态 n；n 变成 6。',run:m=>{const a=m.read('p','ptr');m.writeAt(a,'int',m.read(a,'int')+1);}},
+      {code:'int result = *p;',text:'函数已退出，但静态对象仍存活；合法读到 6。',run:m=>m.alloc('result','int',m.read(m.read('p','ptr'),'int'))}
+    ]
+  },{
+    id:'array-parameter',no:28,title:'数组参数，进入函数后是指针',category:'数组与字符串',
+    description:'传数组并不会复制整个数组；参数调整成指针，sizeof 的结果随之改变。',
+    syntax:['void first(int a[3]); /* 参数调整为 int *a */','first(data);','sizeof data /* 完整数组 */','sizeof a /* 函数内是指针 */'],
+    takeaway:'函数参数的 int a[3] 调整为 int *a，3 不会成为指针携带的长度。函数能通过它改原数组；函数内 sizeof(a) 不能计算实参数组的元素数量，长度应单独传入。',source:'https://en.cppreference.com/c/language/array',
+    steps:[
+      {code:'void first(int a[3]);',text:'数组形式的形参声明调整为 int *a，此处没有运行时分配。'},
+      {code:'int data[3] = {10, 20, 30};',text:'调用者创建真正的数组对象，占 12B。',run:m=>m.alloc('data','int[]',[10,20,30],{label:'int[3]'})},
+      {code:'size_t whole = sizeof data;',text:'数组没有退化，sizeof data 为 12B；不读取其元素。',run:m=>m.alloc('whole','size_t',12)},
+      {code:'first(data); // 进入函数',kind:'call',text:'data 转换成首元素地址。只复制地址到形参 a，不复制十二字节数组。',run:m=>m.alloc('a','ptr',m.addr('data'),{scope:'first',label:'int * · 调整后的形参'})},
+      {code:'size_t inside = sizeof a; // 函数体',text:'a 的类型是 int *，本模型中 sizeof a 为 8B，不能据此得到 data 的长度。',run:m=>m.alloc('inside','size_t',8,{scope:'first'})},
+      {code:'a[0] = 99;',text:'沿形参指针定位调用者的 data[0]，直接改写原数组首四字节。',run:m=>m.writeAt(m.read('a','ptr'),'int',99)},
+      {code:'return; // 返回调用者',kind:'return',text:'形参 a 与局部 inside 生命周期结束；调用者的 data 保留被改写的内容。',run:m=>{m.expire('a');m.expire('inside');}},
+      {code:'int changed = data[0];',text:'调用者观察到 data[0] 已经变成 99；数组没有创建第二份副本。',run:m=>m.alloc('changed','int',m.read('data','int'))}
+    ]
+  });
+})();
+
+</script><script>
+(function(){
+  'use strict';
+  const order=['基础','数组与字符串','类型与抽象','动态内存','边界与安全','C23补充'];
+  const scenarios=window.POINTER_SCENARIOS.sort((a,b)=>order.indexOf(a.category)-order.indexOf(b.category)||a.no-b.no),{simulate,hex,sizes}=PointerMemory;
+  scenarios.forEach((s,i)=>s.no=i+1);
+  const $=id=>document.getElementById(id),escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let lesson=scenarios[0],snapshots=simulate(lesson),cursor=Math.min(3,snapshots.length-1),timer=null,selectedByte=null,tab='lab';
+  const categories=[...new Set(scenarios.map(s=>s.category))];
+  function syntax(code){
+    const re=/(\/\/.*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:int|char|unsigned|const|void|struct|return|if|else|for|while|sizeof|typedef|restrict|volatile|NULL|nullptr|nullptr_t|size_t|ptrdiff_t|bool)\b|\b0x[\da-fA-F]+\b|\b\d+\b|->|[&*])/g;
+    let result='',last=0;for(const m of code.matchAll(re)){result+=escape(code.slice(last,m.index));const t=m[0],kind=t.startsWith('//')?'comment':/^['"]/.test(t)?'string':/^\d/.test(t)?'number':/^(->|[&*])$/.test(t)?'op':'keyword';result+='<span class="tok-'+kind+'">'+escape(t)+'</span>';last=m.index+t.length;}return result+escape(code.slice(last));
+  }
+  function renderNav(){
+    const query=$('search').value.toLowerCase().trim();let count=0;
+    $('scenario-nav').innerHTML=categories.map(c=>{const items=scenarios.filter(s=>s.category===c&&[s.title,s.description,...s.syntax,s.id].join(' ').toLowerCase().includes(query));count+=items.length;return items.length?'<div class="nav-group"><h3>'+escape(c)+'</h3>'+items.map(s=>'<button class="lesson-link '+(s.id===lesson.id?'active':'')+'" data-lesson="'+s.id+'" '+(s.id===lesson.id?'aria-current="true"':'')+'><span class="nav-no">'+String(s.no).padStart(2,'0')+'</span><span>'+escape(s.title)+'</span><span class="nav-status">'+(s.id===lesson.id?'●':'·')+'</span></button>').join('')+'</div>':'';}).join('')||'<div class="no-results">没有匹配的实验。</div>';
+    $('scenario-total').textContent=count+'/'+scenarios.length;
+  }
+  function choose(id,initial=0){
+    const found=scenarios.find(s=>s.id===id);if(!found)return;pause();lesson=found;snapshots=simulate(lesson);cursor=Math.min(initial,snapshots.length-1);selectedByte=null;
+    $('lesson-number').textContent=String(lesson.no).padStart(2,'0');$('lesson-category').textContent=lesson.category;
+    $('lesson-title').textContent=lesson.title;$('lesson-description').textContent=lesson.description;$('takeaway').textContent=lesson.takeaway;
+    $('lesson-source').href=lesson.source;$('timeline').max=snapshots.length-1;renderNav();render();
+  }
+  function resolve(pointer,state){
+    if(pointer.value==null)return {label:pointer.value===null?'NULL · 无目标':'未初始化',row:null};
+    if(pointer.invalid)return {label:'原 '+hex(pointer.value)+' · 现值不确定',row:null};
+    const row=(pointer.targetName&&state.rows.findLast(r=>r.name===pointer.targetName&&r.status==='live'))||state.rows.findLast(r=>r.status==='live'&&pointer.value>=r.address&&pointer.value<r.address+r.size);
+    if(!row)return {label:hex(pointer.value)+' · 边界 / 无存活对象',row:null};
+    const offset=pointer.value-row.address;if(offset===row.size)return {label:row.name+' + '+row.size+'B · 尾后，不可解引用',row:null};
+    const type=row.type.replace('[]',''),unit=sizes[type]||1,field=row.fields?.find(f=>f.offset===offset);
+    const rowPointer=/\(\s*\*\s*\)\s*\[(\d+)\]/.exec(pointer.ownerLabel||'');
+    let label=field&&!(offset===0&&/struct\s/.test(pointer.ownerLabel||''))?row.name+'.'+field.name:offset===0?row.name:row.type.endsWith('[]')?row.name+'['+offset/unit+']':row.name+' + '+offset+'B';
+    if(rowPointer&&row.type==='int[]')label=/int\[\d+\]\[\d+\]/.test(row.label)?row.name+'['+offset/(Number(rowPointer[1])*4)+']（行）':row.name+'（整个数组）';
+    return {row,label,offset};
+  }
+  function numeric(r,offset,type){const size=sizes[type],bytes=r.bytes.slice(offset,offset+size);if(bytes.length!==size||bytes.some(b=>b==null))return '??';let value=0n;bytes.forEach((b,i)=>value|=BigInt(b)<<BigInt(i*8));if(type==='int'||type==='ptrdiff_t')value=BigInt.asIntN(size*8,value);return type==='ptr'?hex(Number(value)):String(value);}
+  function renderMemory(state){
+    const targets=new Set(state.rows.filter(r=>r.status==='live').flatMap(r=>r.pointers.filter(p=>resolve(p,state).row).map(p=>p.value)));
+    $('memory-list').innerHTML=state.rows.length?state.rows.map((r,index)=>{
+      const events=state.events.filter(e=>e.address>=r.address&&e.address<r.address+r.size),cls=r.status!=='live'?'dead':events.some(e=>e.action==='alloc')?'new':events.some(e=>e.action==='write')?'write':events.some(e=>e.action==='read')?'read':'';
+      const ptr=r.type==='ptr'?r.pointers[0]:null;
+      let display=r.fields?.length?r.fields.map(f=>f.name+' = '+numeric(r,f.offset,f.type)).join(' · '):r.display;
+      if(ptr&&!ptr.invalid)display=(ptr.value==null?(ptr.value===null?'NULL':'未初始化'):hex(ptr.value))+'  →  '+resolve(ptr,state).label;
+      if(ptr?.invalid)display='不确定 · 原目标 '+hex(ptr.value);
+      const pointers=r.pointers.map((p,i)=>{const target=resolve(p,state),name=r.fields?.find(f=>f.offset===p.offset)?.name||(!r.type.endsWith('[]')?r.name:r.name+'['+p.offset/8+']');return '<div class="pointer-detail" data-pointer-key="'+index+'-'+i+'">'+escape(name)+' → '+escape(target.label)+(target.row?'<span class="ptr-source" data-source="'+index+'-'+i+'"></span>':'')+'</div>';}).join('');
+      return '<article class="mem-block '+cls+'" data-object="'+index+'"><span class="target-anchor" data-target="'+index+'"></span><div class="mem-header"><span class="mem-name">'+escape(r.name)+'</span><span class="mem-type">'+escape(r.label?r.label.split(' · ')[0].split('（')[0]:r.type)+'</span><span class="region-tag '+r.region+'">'+r.region+'</span><span class="mem-address">'+hex(r.address)+'</span></div><div class="mem-value-row"><span class="mem-value '+(r.pointers.length?'ptr-chip':'')+'">'+escape(display)+'</span><span class="mem-size">'+r.size+' B</span></div>'+(r.type==='function'?'<div class="mem-label">代码区符号 · 不显示伪造的机器指令</div>':'<div class="bytes">'+r.bytes.map((b,i)=>{const address=r.address+i,e=state.events.filter(e=>address>=e.address&&address<e.address+e.size),kind=e.some(e=>e.action==='write')?'written':e.some(e=>e.action==='alloc')?'new':e.some(e=>e.action==='read')?'read':'';return '<button class="byte '+(kind?'was-'+kind:'')+' '+(selectedByte===address?'selected':'')+' '+(targets.has(address)?'is-target':'')+'" data-byte="'+address+'" aria-label="'+escape(r.name)+' 偏移 '+i+' 字节 '+(b==null?'不确定':b.toString(16).padStart(2,'0'))+'" title="'+hex(address)+' / +'+i+(targets.has(address)?' / 有指针指向此处':'')+'"><small>+'+i.toString().padStart(2,'0')+'</small>'+(b==null?'??':b.toString(16).toUpperCase().padStart(2,'0'))+'</button>';}).join('')+'</div>')+pointers+(r.label?'<div class="mem-label">'+escape(r.label)+'</div>':'')+(r.status!=='live'?'<div class="mem-invalid">'+(r.status==='freed'?'已释放':'作用域已结束')+' · 字节仅为历史快照，禁止访问</div>':'')+'</article>';
+    }).join(''):'<div class="memory-empty"><span class="empty-symbol">[ &nbsp; ]</span><span>等待第一个对象进入内存</span><p>点击“下一步”，观察声明与初始化。</p></div>';
+    renderInspector(state);requestAnimationFrame(()=>drawArrows(state));
+  }
+  function drawArrows(state){
+    if(tab!=='lab')return;
+    const stage=$('memory-stage'),svg=$('pointer-arrows'),rect=stage.getBoundingClientRect();if(!rect.width)return;
+    const paths=[];let lane=0;
+    state.rows.forEach((r,ri)=>r.pointers.forEach((p,pi)=>{
+      const target=resolve(p,state),source=stage.querySelector('[data-source="'+ri+'-'+pi+'"]'),end=target.row?stage.querySelector('[data-target="'+state.rows.indexOf(target.row)+'"]'):null;
+      if(!source||!end||r.status!=='live')return;
+      const a=source.getBoundingClientRect(),b=end.getBoundingClientRect(),x1=a.left+a.width/2-rect.left,y1=a.top+a.height/2-rect.top,x2=b.left-rect.left,y2=b.top-rect.top;
+      let right=Math.min(rect.width-6,Math.max(x1,x2)+19+(lane%3)*8);lane++;
+      paths.push('<path d="M '+x1+' '+y1+' C '+right+' '+y1+', '+right+' '+y2+', '+(x2+3)+' '+y2+'" fill="none" stroke="#87edcd" stroke-width="1.3" opacity=".64" marker-end="url(#arrowhead)"><title>'+escape(r.name+' → '+target.label)+'</title></path>');
+    }));
+    svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);svg.innerHTML='<defs><marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" fill="#87edcd"/></marker></defs>'+paths.join('');
+  }
+  function renderInspector(state){
+    const r=selectedByte==null?null:state.rows.findLast(r=>selectedByte>=r.address&&selectedByte<r.address+r.size);
+    if(!r){$('byte-inspector').innerHTML='<span style="color:var(--dim)">BYTE INSPECTOR</span><span>选择任意字节，查看地址、十进制与二进制。</span>';return;}
+    const index=selectedByte-r.address,b=r.bytes[index],prior=cursor>0?snapshots[cursor-1].rows.findLast(x=>x.address===r.address):null,old=prior?.bytes[index];
+    $('byte-inspector').innerHTML='<span class="inspect-value">'+(b==null?'??':b.toString(16).toUpperCase().padStart(2,'0'))+'</span><span class="inspect-part"><small class="inspect-label">ADDRESS</small>'+hex(selectedByte)+'</span><span class="inspect-part"><small class="inspect-label">DECIMAL</small>'+(b??'未知')+'</span><span class="inspect-part"><small class="inspect-label">BINARY</small>'+(b==null?'????????':b.toString(2).padStart(8,'0'))+'</span><span class="inspect-part"><small class="inspect-label">'+escape(r.name)+' + '+index+' / BEFORE</small>'+(old===undefined?'未分配':old===null?'??':old.toString(16).toUpperCase().padStart(2,'0'))+' → '+(b==null?'??':b.toString(16).toUpperCase().padStart(2,'0'))+'</span>'+(r.status!=='live'?'<span style="color:var(--red)">历史快照 · 已失效</span>':'');
+  }
+  function format(value,type){return value===undefined?'??':type==='ptr'?hex(value):value===null?'NULL':String(value);}
+  function render(){
+    const state=snapshots[cursor],step=lesson.steps[cursor-1],max=snapshots.length-1;
+    $('timeline').value=cursor;$('step-count').textContent=String(cursor).padStart(2,'0')+' / '+String(max).padStart(2,'0');
+    $('back').disabled=cursor===0;$('reset').disabled=cursor===0;$('forward').disabled=cursor===max;$('end').disabled=cursor===max;$('play').disabled=cursor===max&&!timer;
+    $('execution-status').textContent=state.diagnostic?(state.diagnostic.kind==='constraint'?'约束违规 · 需要编译诊断':'未定义行为 · 已停止'):cursor===max?'执行完成 · 可回退查看变化':'可随时回退，内存同步恢复';
+    const scroll=$('code-lines').scrollTop;
+    $('code-lines').innerHTML=lesson.steps.map((s,i)=>'<button class="code-line '+(i<cursor?'completed':'future')+' '+(i===cursor-1?'current':'')+' '+(i===cursor-1&&state.diagnostic?'failed':'')+'" data-step="'+(i+1)+'" '+(i===cursor-1?'aria-current="step"':'')+' '+(i>=max?'disabled':'')+'><span class="line-marker">'+(i===cursor-1?(state.diagnostic?'!':'▶'):i<cursor?'✓':s.kind==='call'?'↳':s.kind==='return'?'↰':'')+'</span><span class="line-number">'+String(i+1).padStart(2,'0')+'</span><span class="line-code">'+syntax(s.code)+'</span></button>').join('');
+    $('code-lines').scrollTop=scroll;
+    const current=$('code-lines').querySelector('.current');if(current){const box=$('code-lines'),y=current.offsetTop-box.offsetTop;if(y<box.scrollTop||y+current.offsetHeight>box.scrollTop+box.clientHeight)box.scrollTop=Math.max(0,y-box.clientHeight/2);}
+    $('code-current').textContent=cursor?'已执行到第 '+cursor+' 行':'尚未执行';renderMemory(state);
+    $('step-explanation').textContent=state.diagnostic?state.diagnostic.message:step?.text||'执行前：尚未声明任何对象。下一步将建立第一个对象，并展示它的内存字节。';
+    $('detail-title').textContent=state.diagnostic?(state.diagnostic.kind==='constraint'?'CONSTRAINT VIOLATION':'UNDEFINED BEHAVIOR'):cursor?'STEP '+String(cursor).padStart(2,'0'):'BEFORE EXECUTION';
+    $('detail-icon').textContent=state.diagnostic?'!':'↳';document.querySelector('.step-detail').classList.toggle('danger',!!state.diagnostic);
+    $('changes').innerHTML=state.events.filter(e=>e.action!=='output').map(e=>{
+      if(e.action==='alloc')return '<span class="change">分配 '+escape(e.name)+' · '+hex(e.address)+' · '+e.size+'B</span>';
+      if(e.action==='write')return '<span class="change write">写 '+escape(e.name)+' '+hex(e.address)+'：'+escape(format(e.before,e.type))+' → '+escape(format(e.after,e.type))+'</span>';
+      if(e.action==='read')return '<span class="change read">读 '+escape(e.name)+'：'+escape(format(e.value,e.type))+'</span>';
+      return '<span class="change danger">'+escape(e.name)+' 生命周期结束</span>';
+    }).join('')||'<span class="change">'+(state.diagnostic?'违规操作未执行':'此行没有改写对象字节')+'</span>';
+    $('console').innerHTML=state.output.length?'<div class="console-title">表达式 / 输出</div>'+state.output.slice(-5).map(s=>'<div>'+escape(s)+'</div>').join(''):'';
+  }
+  function go(value){pause();cursor=Math.max(0,Math.min(Number(value),snapshots.length-1));render();}
+  function pause(){if(timer){clearInterval(timer);timer=null;}$('play-icon').textContent='▶';$('play-label').textContent='自动播放';}
+  function play(){if(timer){pause();render();return;}if(cursor>=snapshots.length-1)return;$('play-icon').textContent='Ⅱ';$('play-label').textContent='暂停';timer=setInterval(()=>{cursor++;if(cursor>=snapshots.length-1)pause();render();},Number($('speed').value));render();}
+  function switchTab(next){tab=next;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===next));document.querySelectorAll('.topnav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===next));if(next!=='lab')pause();else requestAnimationFrame(()=>drawArrows(snapshots[cursor]));history.replaceState(null,'','#'+next);}
+  const references=[['指针声明与转换','pointer'],['数组、二维数组与参数','array'],['指针算术','operator_arithmetic#Pointer_arithmetic'],['指针比较','operator_comparison'],['const 与多级限定','const'],['对象表示、对齐与有效类型','object'],['字符串字面量','string_literal'],['restrict 的访问约束','restrict'],['volatile 限定','volatile'],['C23 nullptr','nullptr']];
+  $('source-links').className='source-links';$('source-links').innerHTML=references.map(([name,path])=>'<a target="_blank" rel="noopener" href="https://en.cppreference.com/c/language/'+path+'">'+name+' ↗</a>').join('')+['malloc','calloc','realloc','free'].map(s=>'<a target="_blank" rel="noopener" href="https://en.cppreference.com/c/memory/'+s+'">动态内存 · '+s+' ↗</a>').join('');
+  $('syntax-cards').innerHTML=categories.map(c=>'<h2 class="syntax-group">'+escape(c)+'</h2><div class="syntax-grid">'+scenarios.filter(s=>s.category===c).map(s=>'<article class="syntax-card"><div class="syntax-card-top"><h3>'+escape(s.title)+'</h3><span class="syntax-card-no">'+String(s.no).padStart(2,'0')+'</span></div>'+s.syntax.map(code=>'<code>'+syntax(code)+'</code>').join('')+'<p>'+escape(s.takeaway)+'</p><button data-lesson="'+s.id+'">在内存中试一试 →</button></article>').join('')+'</div>').join('');
+  document.addEventListener('click',e=>{const target=e.target.closest('button,a');if(!target)return;if(target.dataset.lesson){choose(target.dataset.lesson);switchTab('lab');}if(target.dataset.tab)switchTab(target.dataset.tab);if(target.dataset.step)go(target.dataset.step);if(target.dataset.byte){selectedByte=Number(target.dataset.byte);renderMemory(snapshots[cursor]);}});
+  $('search').addEventListener('input',renderNav);$('reset').onclick=()=>go(0);$('back').onclick=()=>go(cursor-1);$('forward').onclick=()=>go(cursor+1);$('end').onclick=()=>go(snapshots.length-1);$('play').onclick=play;$('timeline').addEventListener('input',e=>go(e.target.value));$('speed').onchange=()=>{if(timer){pause();play();}};
+  $('next-lesson').onclick=()=>choose(scenarios[(scenarios.indexOf(lesson)+1)%scenarios.length].id);
+  $('addresses').onclick=()=>{const visible=$('addresses').getAttribute('aria-pressed')!=='true';$('addresses').setAttribute('aria-pressed',visible);$('addresses').textContent=visible?'地址可见':'地址隐藏';$('memory-list').classList.toggle('hide-addresses',!visible);};
+  document.addEventListener('keydown',e=>{if(tab!=='lab'||e.target.closest('input,select,textarea,button,a'))return;if(e.key==='ArrowRight'){e.preventDefault();go(cursor+1);}else if(e.key==='ArrowLeft'){e.preventDefault();go(cursor-1);}else if(e.code==='Space'){e.preventDefault();play();}});
+  window.addEventListener('resize',()=>drawArrows(snapshots[cursor]));window.addEventListener('pagehide',pause);
+  $('stat-scenarios').textContent=scenarios.length;choose(lesson.id,cursor);if(['syntax','model'].includes(location.hash.slice(1)))switchTab(location.hash.slice(1));
+  window.PointerLab={scenarios,getState:()=>({lesson:lesson.id,cursor,max:snapshots.length-1,snapshot:snapshots[cursor]}),choose,go};
+})();
+
+</script>
+</body>
+</html>
